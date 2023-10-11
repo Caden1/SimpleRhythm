@@ -3,23 +3,29 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class BeatMoveController : MonoBehaviour
 {
-	public float moveDistance = 1.0f;
-	private float beatInterval = 0.75f; // Time between each beat for an 80 BPM song.
-	private float nextMoveTime = 0.0f;
-	private Vector2 startPosition;
-	private Vector2 targetPosition;
+	private float moveDistance = 1f;
+	private float jumpForce = 5f;
+	private float beatInterval = 1f; // Time between each beat for an 60 BPM song.
+	private float nextMoveTime = 0f;
 	private float moveStartTime;
-	private Rigidbody2D rb;
 	private float startRotation;
 	private float targetRotation;
 	private float wallCheckDistance = 1f;
 	private bool isNearWall = false;
-	private LayerMask wallLayerMask; // Targets everything except Player layer
 	private int moveDirection = 1;
+	private float nextJumpTime = 0f;
+	private float groundCheckDistance = 1f;
+	private bool isGrounded = false;
+	private bool hasJumped = false;
+
+	private Vector2 currentVelocity = Vector2.zero;
+	private Rigidbody2D rb;
+	private LayerMask ignorePlayerMask; // Targets everything except Player layer
 
 	private void Start() {
 		rb = GetComponent<Rigidbody2D>();
-		wallLayerMask = ~LayerMask.GetMask("Player");
+		ignorePlayerMask = ~LayerMask.GetMask("Player");
+		nextJumpTime = Time.time + beatInterval / 2;
 	}
 
 	private void Update() {
@@ -30,29 +36,46 @@ public class BeatMoveController : MonoBehaviour
 		}
 
 		Vector2 raycastDirection = (moveDirection == 1) ? Vector2.right : Vector2.left;
-		isNearWall = Physics2D.Raycast(transform.position, raycastDirection, wallCheckDistance, wallLayerMask);
+		isNearWall = Physics2D.Raycast(transform.position, raycastDirection, wallCheckDistance, ignorePlayerMask);
 
 		if (isNearWall) {
 			moveDirection *= -1;
 			return;
 		}
 
+		isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, ignorePlayerMask);
+
+		// Handle horizontal movement
 		if (Time.time >= nextMoveTime) {
-			startPosition = rb.position;
-			targetPosition = startPosition + new Vector2(moveDistance * moveDirection, 0);
+			float moveX = moveDistance * moveDirection;
+			currentVelocity.x = moveX / beatInterval;
 			startRotation = transform.eulerAngles.z;
 			targetRotation = startRotation + (-90.0f * moveDirection);
+
 			moveStartTime = Time.time;
 			nextMoveTime = Time.time + beatInterval;
 		}
 
-		float t = (Time.time - moveStartTime) / beatInterval; // Calculate the fraction of the movement/rotation completed
-		Vector2 newPosition = Vector2.Lerp(startPosition, targetPosition, Mathf.SmoothStep(0.0f, 1.0f, t));
-		rb.MovePosition(newPosition);
+		// Handle jump
+		if (Time.time >= nextJumpTime && isGrounded && !hasJumped) {
+			rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+			hasJumped = true;
+			nextJumpTime = Time.time + beatInterval;
+		}
+
+		if (isGrounded) {
+			hasJumped = false;
+		}
+
+		// Apply horizontal velocity
+		rb.velocity = new Vector2(currentVelocity.x, rb.velocity.y);
+
+		// Handle rotations
+		float t = (Time.time - moveStartTime) / beatInterval;
 		float newRotation = Mathf.Lerp(startRotation, targetRotation, Mathf.SmoothStep(0.0f, 1.0f, t));
 		transform.rotation = Quaternion.Euler(0, 0, newRotation);
 
-		if (t > 0.95f) { // When movement is close to completion, snap to the nearest 90-degree interval
+		if (t > 0.95f) {
 			float snappedRotation = SnapToNearest90(transform.eulerAngles.z);
 			transform.rotation = Quaternion.Euler(0, 0, snappedRotation);
 		}
