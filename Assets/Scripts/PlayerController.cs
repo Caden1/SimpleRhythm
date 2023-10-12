@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UIElements;
+using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
@@ -15,13 +15,14 @@ public class PlayerController : MonoBehaviour
 	private float wallCheckDistance = 1f;
 	private bool isNearWall = false;
 	private int moveDirection = 1;
-	private float nextJumpTime = 0f;
 	private float groundCheckDistance = 1f;
 	private bool isGrounded = false;
-	private bool hasJumped = false;
 	private int beatCounter = 0;
 	private float moveDuration;
 	private float moveTimer = 0f;
+	private bool queueJump = false;
+	private float snappedRotation;
+	private Vector2 snapToPosition;
 
 	private Vector2 currentVelocity = Vector2.zero;
 	private Rigidbody2D rb;
@@ -33,8 +34,7 @@ public class PlayerController : MonoBehaviour
 		beatInterval = 60f / bpm;
 		rb = GetComponent<Rigidbody2D>();
 		ignorePlayerMask = ~LayerMask.GetMask("Player");
-		nextJumpTime = Time.time + beatInterval / 2;
-		moveDuration = beatInterval * 0.8f;
+		moveDuration = beatInterval * 0.5f;
 	}
 
 	private void Update() {
@@ -42,6 +42,9 @@ public class PlayerController : MonoBehaviour
 			moveDirection = -1;
 		} else if (Input.GetKeyDown(KeyCode.D)) {
 			moveDirection = 1;
+		}
+		if (Input.GetKeyDown(KeyCode.Space)) {
+			queueJump = true;
 		}
 
 		Vector2 raycastDirection = (moveDirection == 1) ? Vector2.right : Vector2.left;
@@ -56,7 +59,7 @@ public class PlayerController : MonoBehaviour
 
 		// Handle horizontal movement
 		if (Time.time >= nextMoveTime) {
-			// (beatInterval - moveDuration) makes up for the moveDuration reduction in distance
+			// The (beatInterval - moveDuration) makes up for the moveDuration reduction in distance
 			float moveX = (moveDistance + (beatInterval - moveDuration)) * moveDirection;
 			currentVelocity.x = moveX / beatInterval;
 			startRotation = transform.eulerAngles.z;
@@ -69,25 +72,20 @@ public class PlayerController : MonoBehaviour
 			beatCounter = (beatCounter + 1) % 4;
 
 			moveTimer = moveDuration;
+
+			if (queueJump && isGrounded) {
+				rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+				audioManager.PlayHiHat();
+				queueJump = false;
+			}
 		}
 
-		// Handle jump
-		if (Time.time >= nextJumpTime && isGrounded && !hasJumped && beatCounter % 2 == 0) {
-			rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
-			audioManager.PlayHiHat();
-			hasJumped = true;
-			nextJumpTime = Time.time + beatInterval;
-		}
-
-		if (isGrounded) {
-			hasJumped = false;
-		}
-
+		// Perform horizontal movement
 		if (moveTimer > 0) {
 			rb.velocity = new Vector2(currentVelocity.x, rb.velocity.y);
 			moveTimer -= Time.deltaTime;
 		} else {
-			rb.velocity = new Vector2(0, rb.velocity.y);
+			rb.velocity = new Vector2(0f, rb.velocity.y);
 		}
 
 
@@ -96,11 +94,12 @@ public class PlayerController : MonoBehaviour
 		float newRotation = Mathf.Lerp(startRotation, targetRotation, Mathf.SmoothStep(0.0f, 1.0f, t));
 		transform.rotation = Quaternion.Euler(0, 0, newRotation);
 
+		// Handle snapping to grid
 		if (t > 0.95f) {
-			float snappedRotation = SnapToNearest90(transform.eulerAngles.z);
+			StartCoroutine(HandleRotateSnap());
 			transform.rotation = Quaternion.Euler(0, 0, snappedRotation);
 			if (isGrounded) {
-				Vector2 snapToPosition = SnapToGrid(transform.position, 1f);
+				StartCoroutine(HandlePositionSnap());
 				transform.position = Vector3.Lerp(transform.position, snapToPosition, 10f * Time.deltaTime);
 				if (bpm >= 80f) {
 					if (Vector2.Distance(transform.position, snapToPosition) < 0.1f) {
@@ -112,13 +111,23 @@ public class PlayerController : MonoBehaviour
 					}
 				}
 			} else {
-				Vector2 snapToX = SnapToX(transform.position, 1f);
-				transform.position = Vector3.Lerp(transform.position, snapToX, 10f * Time.deltaTime);
-				if (Vector2.Distance(transform.position, snapToX) < 0.02f) {
-					transform.position = snapToX;
+				Vector2 snapToAirPosition = SnapToGrid(transform.position, 1f);
+				transform.position = Vector3.Lerp(transform.position, snapToAirPosition, 10f * Time.deltaTime);
+				if (Vector2.Distance(transform.position, snapToAirPosition) < 0.02f) {
+					transform.position = snapToAirPosition;
 				}
 			}
 		}
+	}
+
+	private IEnumerator HandleRotateSnap() {
+		snappedRotation = SnapToNearest90(transform.eulerAngles.z);
+		yield return null;
+	}
+
+	private IEnumerator HandlePositionSnap() {
+		snapToPosition = SnapToGrid(transform.position, 1f);
+		yield return null;
 	}
 
 	private float SnapToNearest90(float angle) {
@@ -127,12 +136,7 @@ public class PlayerController : MonoBehaviour
 
 	private Vector2 SnapToGrid(Vector2 position, float gridSize) {
 		float x = Mathf.Round(position.x / gridSize) * gridSize;
-		float y = Mathf.Round(position.y / gridSize) * gridSize;
+		float y = Mathf.Round(position.y / gridSize ) * gridSize;
 		return new Vector2(x, y);
-	}
-
-	private Vector2 SnapToX(Vector2 position, float gridSize) {
-		float x = Mathf.Round(position.x / gridSize) * gridSize;
-		return new Vector2(x, position.y);
 	}
 }
