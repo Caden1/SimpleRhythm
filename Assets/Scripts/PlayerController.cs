@@ -1,10 +1,11 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-	private float moveDistance = 2f;
-	private float jumpForce = 7f;
+	private float moveDistance = 1f;
+	private float jumpForce = 5f;
 	private float bpm = 40f;
 	private float beatInterval;
 	private float nextMoveTime = 0f;
@@ -98,10 +99,40 @@ public class PlayerController : MonoBehaviour
 		if (t > 0.95f) {
 			float snappedRotation = SnapToNearest90(transform.eulerAngles.z);
 			transform.rotation = Quaternion.Euler(0, 0, snappedRotation);
+			if (isGrounded) {
+				Vector2 snapToPosition = SnapToGrid(transform.position, 1f);
+				transform.position = Vector3.Lerp(transform.position, snapToPosition, 10f * Time.deltaTime);
+				if (bpm >= 80f) {
+					if (Vector2.Distance(transform.position, snapToPosition) < 0.1f) {
+						transform.position = snapToPosition;
+					}
+				} else {
+					if (Vector2.Distance(transform.position, snapToPosition) < 0.02f) {
+						transform.position = snapToPosition;
+					}
+				}
+			} else {
+				Vector2 snapToX = SnapToX(transform.position, 1f);
+				transform.position = Vector3.Lerp(transform.position, snapToX, 10f * Time.deltaTime);
+				if (Vector2.Distance(transform.position, snapToX) < 0.02f) {
+					transform.position = snapToX;
+				}
+			}
 		}
 	}
 
 	private float SnapToNearest90(float angle) {
 		return Mathf.Round(angle / 90.0f) * 90.0f;
+	}
+
+	private Vector2 SnapToGrid(Vector2 position, float gridSize) {
+		float x = Mathf.Round(position.x / gridSize) * gridSize;
+		float y = Mathf.Round(position.y / gridSize) * gridSize;
+		return new Vector2(x, y);
+	}
+
+	private Vector2 SnapToX(Vector2 position, float gridSize) {
+		float x = Mathf.Round(position.x / gridSize) * gridSize;
+		return new Vector2(x, position.y);
 	}
 }
