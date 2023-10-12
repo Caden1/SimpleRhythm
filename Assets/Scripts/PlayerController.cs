@@ -1,11 +1,12 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class BeatMoveController : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
-	private float moveDistance = 1f;
-	private float jumpForce = 5f;
-	private float beatInterval = 1f; // Time between each beat for an 60 BPM song.
+	private float moveDistance = 2f;
+	private float jumpForce = 7f;
+	private float bpm = 40f;
+	private float beatInterval;
 	private float nextMoveTime = 0f;
 	private float moveStartTime;
 	private float startRotation;
@@ -17,15 +18,22 @@ public class BeatMoveController : MonoBehaviour
 	private float groundCheckDistance = 1f;
 	private bool isGrounded = false;
 	private bool hasJumped = false;
+	private int beatCounter = 0;
+	private float moveDuration;
+	private float moveTimer = 0f;
 
 	private Vector2 currentVelocity = Vector2.zero;
 	private Rigidbody2D rb;
 	private LayerMask ignorePlayerMask; // Targets everything except Player layer
+	private AudioManager audioManager;
 
 	private void Start() {
+		audioManager = GameObject.Find("AudioObject").GetComponent<AudioManager>();
+		beatInterval = 60f / bpm;
 		rb = GetComponent<Rigidbody2D>();
 		ignorePlayerMask = ~LayerMask.GetMask("Player");
 		nextJumpTime = Time.time + beatInterval / 2;
+		moveDuration = beatInterval * 0.8f;
 	}
 
 	private void Update() {
@@ -47,18 +55,25 @@ public class BeatMoveController : MonoBehaviour
 
 		// Handle horizontal movement
 		if (Time.time >= nextMoveTime) {
-			float moveX = moveDistance * moveDirection;
+			// (beatInterval - moveDuration) makes up for the moveDuration reduction in distance
+			float moveX = (moveDistance + (beatInterval - moveDuration)) * moveDirection;
 			currentVelocity.x = moveX / beatInterval;
 			startRotation = transform.eulerAngles.z;
 			targetRotation = startRotation + (-90.0f * moveDirection);
 
 			moveStartTime = Time.time;
 			nextMoveTime = Time.time + beatInterval;
+
+			audioManager.PlayKick();
+			beatCounter = (beatCounter + 1) % 4;
+
+			moveTimer = moveDuration;
 		}
 
 		// Handle jump
-		if (Time.time >= nextJumpTime && isGrounded && !hasJumped) {
+		if (Time.time >= nextJumpTime && isGrounded && !hasJumped && beatCounter % 2 == 0) {
 			rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+			audioManager.PlayHiHat();
 			hasJumped = true;
 			nextJumpTime = Time.time + beatInterval;
 		}
@@ -67,11 +82,16 @@ public class BeatMoveController : MonoBehaviour
 			hasJumped = false;
 		}
 
-		// Apply horizontal velocity
-		rb.velocity = new Vector2(currentVelocity.x, rb.velocity.y);
+		if (moveTimer > 0) {
+			rb.velocity = new Vector2(currentVelocity.x, rb.velocity.y);
+			moveTimer -= Time.deltaTime;
+		} else {
+			rb.velocity = new Vector2(0, rb.velocity.y);
+		}
+
 
 		// Handle rotations
-		float t = (Time.time - moveStartTime) / beatInterval;
+		float t = (Time.time - moveStartTime) / moveDuration;
 		float newRotation = Mathf.Lerp(startRotation, targetRotation, Mathf.SmoothStep(0.0f, 1.0f, t));
 		transform.rotation = Quaternion.Euler(0, 0, newRotation);
 
