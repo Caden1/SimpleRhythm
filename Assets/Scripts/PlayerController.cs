@@ -5,7 +5,7 @@ using System.Collections;
 public class PlayerController : MonoBehaviour
 {
 	private float moveDistance = 1f;
-	private float jumpForce = 5f;
+	private float jumpForce = 5.05f;
 	private float bpm = 40f;
 	private float beatInterval;
 	private float nextMoveTime = 0f;
@@ -17,24 +17,26 @@ public class PlayerController : MonoBehaviour
 	private int moveDirection = 1;
 	private float groundCheckDistance = 1f;
 	private bool isGrounded = false;
-	private int beatCounter = 0;
 	private float moveDuration;
 	private float moveTimer = 0f;
 	private bool queueJump = false;
 	private float snappedRotation;
-	private Vector2 snapToPosition;
+	private float startGravity;
+	private bool addForceMovement = false;
 
+	private Vector2 snapToPosition;
 	private Vector2 currentVelocity = Vector2.zero;
-	private Rigidbody2D rb;
 	private LayerMask ignorePlayerMask; // Targets everything except Player layer
 	private AudioManager audioManager;
+	private Rigidbody2D rb;
 
 	private void Start() {
 		audioManager = GameObject.Find("AudioObject").GetComponent<AudioManager>();
 		beatInterval = 60f / bpm;
 		rb = GetComponent<Rigidbody2D>();
-		ignorePlayerMask = ~LayerMask.GetMask("Player");
+		ignorePlayerMask = ~(LayerMask.GetMask("Player") | LayerMask.GetMask("Enemy"));
 		moveDuration = beatInterval * 0.5f;
+		startGravity = rb.gravityScale;
 	}
 
 	private void Update() {
@@ -59,9 +61,13 @@ public class PlayerController : MonoBehaviour
 
 		// Handle horizontal movement
 		if (Time.time >= nextMoveTime) {
-			// The (beatInterval - moveDuration) makes up for the moveDuration reduction in distance
-			float moveX = (moveDistance + (beatInterval - moveDuration)) * moveDirection;
-			currentVelocity.x = moveX / beatInterval;
+			rb.gravityScale = startGravity;
+			if (!isGrounded) {
+				addForceMovement = true;
+			}
+			float moveXOffset = 0.4f;
+			float moveX = (moveDistance + moveXOffset) * moveDirection;
+			currentVelocity.x = moveX;
 			startRotation = transform.eulerAngles.z;
 			targetRotation = startRotation + (-90.0f * moveDirection);
 
@@ -69,25 +75,29 @@ public class PlayerController : MonoBehaviour
 			nextMoveTime = Time.time + beatInterval;
 
 			audioManager.PlayKick();
-			beatCounter = (beatCounter + 1) % 4;
 
 			moveTimer = moveDuration;
 
+			// Handle jump
 			if (queueJump && isGrounded) {
-				rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+				rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
 				audioManager.PlayHiHat();
 				queueJump = false;
 			}
 		}
 
 		// Perform horizontal movement
-		if (moveTimer > 0) {
-			rb.velocity = new Vector2(currentVelocity.x, rb.velocity.y);
-			moveTimer -= Time.deltaTime;
+		if (addForceMovement) {
+			addForceMovement = false;
+			rb.AddForce(new Vector2(1f * moveDirection, 4f), ForceMode2D.Impulse);
 		} else {
-			rb.velocity = new Vector2(0f, rb.velocity.y);
+			if (moveTimer > 0) {
+				rb.velocity = new Vector2(currentVelocity.x, rb.velocity.y);
+				moveTimer -= Time.deltaTime;
+			} else {
+				rb.velocity = new Vector2(0f, rb.velocity.y);
+			}
 		}
-
 
 		// Handle rotations
 		float t = (Time.time - moveStartTime) / moveDuration;
@@ -98,24 +108,10 @@ public class PlayerController : MonoBehaviour
 		if (t > 0.95f) {
 			StartCoroutine(HandleRotateSnap());
 			transform.rotation = Quaternion.Euler(0, 0, snappedRotation);
-			if (isGrounded) {
-				StartCoroutine(HandlePositionSnap());
-				transform.position = Vector3.Lerp(transform.position, snapToPosition, 10f * Time.deltaTime);
-				if (bpm >= 80f) {
-					if (Vector2.Distance(transform.position, snapToPosition) < 0.1f) {
-						transform.position = snapToPosition;
-					}
-				} else {
-					if (Vector2.Distance(transform.position, snapToPosition) < 0.02f) {
-						transform.position = snapToPosition;
-					}
-				}
-			} else {
-				Vector2 snapToAirPosition = SnapToGrid(transform.position, 1f);
-				transform.position = Vector3.Lerp(transform.position, snapToAirPosition, 10f * Time.deltaTime);
-				if (Vector2.Distance(transform.position, snapToAirPosition) < 0.02f) {
-					transform.position = snapToAirPosition;
-				}
+			StartCoroutine(HandlePositionSnap());
+			transform.position = snapToPosition;
+			if (!isGrounded) {
+				rb.gravityScale = 0f;
 			}
 		}
 	}
