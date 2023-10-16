@@ -5741,8 +5741,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efc89e8d0a81944fda1cc74beb015cb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kickClip: {fileID: 8300000, guid: ab3a00b3aac1b44c7a4f488d2aa04474, type: 3}
-  hiHatClip: {fileID: 8300000, guid: e63fb0cb6b8964118b6ff46bde67fb37, type: 3}
+  texture: {fileID: 8300000, guid: 2de264b7ceb20469188bd13cba28d373, type: 3}
+  kickNoSnare: {fileID: 8300000, guid: 60b97425aceb142c3bed02b3fb1750b2, type: 3}
+  kickWithSnare: {fileID: 8300000, guid: 2f93ee037fc8e4fb28db441f5e7bff32, type: 3}
+  snare: {fileID: 8300000, guid: 9c6d142aa835f4230bb3a9cd1e65d1c1, type: 3}
+  enemyDrums: {fileID: 8300000, guid: 70a3d9173f1f04ebc907452e4079dc10, type: 3}
+  enemyBass: {fileID: 8300000, guid: 4657b48b46b744846b22407af94f0c62, type: 3}
+  enemyChords: {fileID: 8300000, guid: 8e53b14ad09984778bd0f715dc214047, type: 3}
+  enemyMelody: {fileID: 8300000, guid: 270ae9f54580b443297351bb1af4d4ce, type: 3}
 --- !u!1 &1285910398
 GameObject:
   m_ObjectHideFlags: 0

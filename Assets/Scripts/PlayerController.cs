@@ -23,15 +23,16 @@ public class PlayerController : MonoBehaviour
 	private float snappedRotation;
 	private float startGravity;
 	private bool addForceMovement = false;
+	private int beatCounter = 0;
 
 	private Vector2 snapToPosition;
 	private Vector2 currentVelocity = Vector2.zero;
 	private LayerMask ignorePlayerMask; // Targets everything except Player layer
-	private AudioManager audioManager;
+	private AudioManager40bpm audioManager40bpm;
 	private Rigidbody2D rb;
 
 	private void Start() {
-		audioManager = GameObject.Find("AudioObject").GetComponent<AudioManager>();
+		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
 		beatInterval = 60f / bpm;
 		rb = GetComponent<Rigidbody2D>();
 		ignorePlayerMask = ~(LayerMask.GetMask("Player") | LayerMask.GetMask("Enemy"));
@@ -74,15 +75,21 @@ public class PlayerController : MonoBehaviour
 			moveStartTime = Time.time;
 			nextMoveTime = Time.time + beatInterval;
 
-			audioManager.PlayKick();
+			if (beatCounter == 0) {
+				audioManager40bpm.PlayTexture();
+			}
+
+			beatCounter = (beatCounter + 1) % 4;
 
 			moveTimer = moveDuration;
 
 			// Handle jump
 			if (queueJump && isGrounded) {
 				rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
-				audioManager.PlayHiHat();
+				audioManager40bpm.PlayKickWithSnare();
 				queueJump = false;
+			} else {
+				audioManager40bpm.PlayKickNoSnare();
 			}
 		}
 
