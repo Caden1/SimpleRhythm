@@ -17,12 +17,14 @@ public class EnemyController : MonoBehaviour
 	private Rigidbody2D rb;
 	private AudioManager40bpm audioManager40bpm;
 	private int beatCounter = 0;
+	private Animator animator;
 
 	private void Start() {
 		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
 		beatInterval = 60f / bpm;
 		moveDuration = beatInterval * 0.5f;
 		rb = GetComponent<Rigidbody2D>();
+		animator = GetComponent<Animator>();
 	}
 
 	private void Update() {
@@ -38,6 +40,8 @@ public class EnemyController : MonoBehaviour
 			if (beatCounter == 0) {
 				audioManager40bpm.PlayEnemyDrums();
 			}
+
+			animator.Play("Pulse");
 
 			beatCounter = (beatCounter + 1) % 4;
 
@@ -57,6 +61,7 @@ public class EnemyController : MonoBehaviour
 		if (t > 0.95f) {
 			StartCoroutine(HandlePositionSnap());
 			transform.position = snapToPosition;
+			animator.Play("EmptyState");
 		}
 	}
 
