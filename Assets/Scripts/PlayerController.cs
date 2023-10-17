@@ -35,7 +35,7 @@ public class PlayerController : MonoBehaviour
 		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
 		beatInterval = 60f / bpm;
 		rb = GetComponent<Rigidbody2D>();
-		ignorePlayerMask = ~(LayerMask.GetMask("Player") | LayerMask.GetMask("Enemy"));
+		ignorePlayerMask = ~(LayerMask.GetMask("Player") | LayerMask.GetMask("Enemy") | LayerMask.GetMask("Triggers"));
 		moveDuration = beatInterval * 0.5f;
 		startGravity = rb.gravityScale;
 	}
