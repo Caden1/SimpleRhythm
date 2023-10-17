@@ -15,8 +15,11 @@ public class EnemyController : MonoBehaviour
 	private Vector2 snapToPosition;
 	private Vector2 currentVelocity = Vector2.zero;
 	private Rigidbody2D rb;
+	private AudioManager40bpm audioManager40bpm;
+	private int beatCounter = 0;
 
 	private void Start() {
+		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
 		beatInterval = 60f / bpm;
 		moveDuration = beatInterval * 0.5f;
 		rb = GetComponent<Rigidbody2D>();
@@ -31,6 +34,12 @@ public class EnemyController : MonoBehaviour
 
 			moveStartTime = Time.time;
 			nextMoveTime = Time.time + beatInterval;
+
+			if (beatCounter == 0) {
+				audioManager40bpm.PlayEnemyDrums();
+			}
+
+			beatCounter = (beatCounter + 1) % 4;
 
 			moveTimer = moveDuration;
 		}
