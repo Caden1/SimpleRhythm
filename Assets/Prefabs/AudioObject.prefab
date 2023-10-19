@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3508729207593812585
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2521768906549356040}
+  - component: {fileID: 5453858588133408917}
+  m_Layer: 0
+  m_Name: AudioObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2521768906549356040
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3508729207593812585}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5453858588133408917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3508729207593812585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efc89e8d0a81944fda1cc74beb015cb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  texture: {fileID: 8300000, guid: 2de264b7ceb20469188bd13cba28d373, type: 3}
+  kickNoSnare: {fileID: 8300000, guid: 60b97425aceb142c3bed02b3fb1750b2, type: 3}
+  kickWithSnare: {fileID: 8300000, guid: 2f93ee037fc8e4fb28db441f5e7bff32, type: 3}
+  enemyDrums: {fileID: 8300000, guid: 70a3d9173f1f04ebc907452e4079dc10, type: 3}
+  enemyBass: {fileID: 8300000, guid: 4657b48b46b744846b22407af94f0c62, type: 3}
+  enemyChords: {fileID: 8300000, guid: 8e53b14ad09984778bd0f715dc214047, type: 3}
+  enemyMelody: {fileID: 8300000, guid: 270ae9f54580b443297351bb1af4d4ce, type: 3}
