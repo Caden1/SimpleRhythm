@@ -1,8 +1,10 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
 	public GameObject enemyPrefab;
+	public bool enemyMoveLeft;
 
 	private float bpm = 40f;
 	private float nextMoveTime = 0f;
@@ -14,6 +16,7 @@ public class EnemySpawner : MonoBehaviour
 	private void Start() {
 		beatInterval = 60f / bpm;
 		spawnPoint = gameObject.transform.position;
+		enemyPrefab.GetComponent<EnemyController>().moveLeft = enemyMoveLeft;
 	}
 
 	private void Update() {

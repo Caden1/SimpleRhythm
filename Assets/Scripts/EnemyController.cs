@@ -4,12 +4,14 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class EnemyController : MonoBehaviour
 {
-	private float moveDistance = 1f;
+	[HideInInspector]
+	public bool moveLeft = true;
+
 	private float bpm = 40f;
 	private float beatInterval;
 	private float nextMoveTime = 0f;
 	private float moveStartTime;
-	private int moveDirection = -1;
+	private int moveDirection;
 	private float moveDuration;
 	private float moveTimer = 0f;
 	private Vector2 snapToPosition;
@@ -18,30 +20,52 @@ public class EnemyController : MonoBehaviour
 	private AudioManager40bpm audioManager40bpm;
 	private int beatCounter = 0;
 	private Animator animator;
+	private string enemyName;
+	private BoxCollider2D boxCollider;
+	private float startGravity;
+
+	private const string JumpEnemyName = "JumpEnemy(Clone)";
+	private const string DashEnemyName = "DashEnemy(Clone)";
 
 	private void Start() {
+		enemyName = gameObject.name;
+		boxCollider = GetComponent<BoxCollider2D>();
 		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
 		beatInterval = 60f / bpm;
 		moveDuration = beatInterval * 0.5f;
 		rb = GetComponent<Rigidbody2D>();
 		animator = GetComponent<Animator>();
+		startGravity = rb.gravityScale;
+		if (moveLeft) {
+			moveDirection = -1;
+		} else {
+			moveDirection = 1;
+		}
 	}
 
 	private void Update() {
 		// Handle horizontal movement
 		if (Time.time >= nextMoveTime) {
-			float moveXOffset = 0.4f;
-			float moveX = (moveDistance + moveXOffset) * moveDirection;
-			currentVelocity.x = moveX;
-
 			moveStartTime = Time.time;
 			nextMoveTime = Time.time + beatInterval;
 
-			if (beatCounter == 0) {
-				audioManager40bpm.PlayEnemyDrums();
+			if (enemyName == JumpEnemyName) {
+				float moveDistance = 1f;
+				float moveXOffset = 0.4f;
+				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
+				animator.Play("Pulse");
+				if (beatCounter == 0) {
+					audioManager40bpm.PlayEnemyDrums();
+				}
+			} else if (enemyName == DashEnemyName) {
+				float moveDistance = 1f;
+				float moveXOffset = 0.8f;
+				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
+				animator.Play("Fade");
+				if (beatCounter == 0) {
+					audioManager40bpm.PlayEnemyBass();
+				}
 			}
-
-			animator.Play("Pulse");
 
 			beatCounter = (beatCounter + 1) % 4;
 
@@ -50,9 +74,17 @@ public class EnemyController : MonoBehaviour
 
 		// Perform horizontal movement
 		if (moveTimer > 0) {
+			if (enemyName == DashEnemyName) {
+				rb.gravityScale = 0f;
+				boxCollider.enabled = false;
+			}
 			rb.velocity = new Vector2(currentVelocity.x, rb.velocity.y);
 			moveTimer -= Time.deltaTime;
 		} else {
+			if (enemyName == DashEnemyName) {
+				boxCollider.enabled = true;
+				rb.gravityScale = startGravity;
+			}
 			rb.velocity = new Vector2(0f, rb.velocity.y);
 		}
 
@@ -72,13 +104,18 @@ public class EnemyController : MonoBehaviour
 
 	private Vector2 SnapToGrid(Vector2 position, float gridSize) {
 		float x = Mathf.Round(position.x / gridSize) * gridSize;
-		float y = Mathf.Round(position.y / gridSize) * gridSize;
+		float y = 0f;
+		if (enemyName == JumpEnemyName) {
+			y = Mathf.Round(position.y / gridSize) * gridSize;
+		} else if (enemyName == DashEnemyName) {
+			y = Mathf.Round((position.y - 0.5f) / gridSize) * gridSize + 0.5f;
+		}
 		return new Vector2(x, y);
 	}
 
 	private void OnCollisionEnter2D(Collision2D collision) {
 		if (collision.gameObject.CompareTag("Player")) {
-			Debug.Log("Player Hit");
+			Destroy(collision.gameObject);
 		}
 	}
 }
