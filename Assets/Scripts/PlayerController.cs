@@ -5,6 +5,7 @@ using System.Collections;
 public class PlayerController : MonoBehaviour
 {
 	private float moveDistance = 1f;
+	private float dashDistance = 2f;
 	private float jumpForce = 5.05f;
 	private float bpm = 40f;
 	private float beatInterval;
@@ -20,6 +21,7 @@ public class PlayerController : MonoBehaviour
 	private float moveDuration;
 	private float moveTimer = 0f;
 	private bool queueJump = false;
+	private bool queueDash = false;
 	private float snappedRotation;
 	private float startGravity;
 	private bool addForceMovement = false;
@@ -41,13 +43,10 @@ public class PlayerController : MonoBehaviour
 	}
 
 	private void Update() {
-		if (Input.GetKeyDown(KeyCode.A)) {
-			moveDirection = -1;
-		} else if (Input.GetKeyDown(KeyCode.D)) {
-			moveDirection = 1;
-		}
-		if (Input.GetKeyDown(KeyCode.Space)) {
+		if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W)) {
 			queueJump = true;
+		} else if (Input.GetKeyDown(KeyCode.D)) {
+			queueDash = true;
 		}
 
 		Vector2 raycastDirection = (moveDirection == 1) ? Vector2.right : Vector2.left;
@@ -63,14 +62,22 @@ public class PlayerController : MonoBehaviour
 		// Handle horizontal movement
 		if (Time.time >= nextMoveTime) {
 			rb.gravityScale = startGravity;
+
 			if (!isGrounded) {
 				addForceMovement = true;
 			}
-			float moveXOffset = 0.4f;
-			float moveX = (moveDistance + moveXOffset) * moveDirection;
-			currentVelocity.x = moveX;
+
 			startRotation = transform.eulerAngles.z;
-			targetRotation = startRotation + (-90.0f * moveDirection);
+
+			if (queueDash) {
+				float dashXOffset = 0.8f;
+				currentVelocity.x = (dashDistance + dashXOffset) * moveDirection;
+				targetRotation = startRotation + (-180.0f * moveDirection);
+			} else {
+				float moveXOffset = 0.4f;
+				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
+				targetRotation = startRotation + (-90.0f * moveDirection);
+			}
 
 			moveStartTime = Time.time;
 			nextMoveTime = Time.time + beatInterval;
@@ -88,6 +95,9 @@ public class PlayerController : MonoBehaviour
 				rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
 				audioManager40bpm.PlayKickWithSnare();
 				queueJump = false;
+			} else if (queueDash) {
+				audioManager40bpm.PlayKickWithSnare();
+				queueDash = false;
 			} else {
 				audioManager40bpm.PlayKickNoSnare();
 			}
@@ -106,8 +116,9 @@ public class PlayerController : MonoBehaviour
 			}
 		}
 
-		// Handle rotations
 		float t = (Time.time - moveStartTime) / moveDuration;
+
+		// Handle rotations
 		float newRotation = Mathf.Lerp(startRotation, targetRotation, Mathf.SmoothStep(0.0f, 1.0f, t));
 		transform.rotation = Quaternion.Euler(0, 0, newRotation);
 
