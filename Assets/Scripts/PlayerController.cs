@@ -45,8 +45,10 @@ public class PlayerController : MonoBehaviour
 	private void Update() {
 		if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W)) {
 			queueJump = true;
+			queueDash = false;
 		} else if (Input.GetKeyDown(KeyCode.D)) {
 			queueDash = true;
+			queueJump = false;
 		}
 
 		Vector2 raycastDirection = (moveDirection == 1) ? Vector2.right : Vector2.left;
