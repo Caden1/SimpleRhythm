@@ -26,6 +26,7 @@ public class EnemyController : MonoBehaviour
 
 	private const string JumpEnemyName = "JumpEnemy(Clone)";
 	private const string DashEnemyName = "DashEnemy(Clone)";
+	private const string ShieldEnemyName = "ShieldEnemy(Clone)";
 
 	private void Start() {
 		enemyName = gameObject.name;
@@ -40,6 +41,12 @@ public class EnemyController : MonoBehaviour
 			moveDirection = -1;
 		} else {
 			moveDirection = 1;
+			if (enemyName == ShieldEnemyName) {
+				GetComponent<SpriteRenderer>().flipX = true;
+			}
+		}
+		if (enemyName == ShieldEnemyName) {
+			rb.gravityScale = 0f;
 		}
 	}
 
@@ -59,11 +66,19 @@ public class EnemyController : MonoBehaviour
 				}
 			} else if (enemyName == DashEnemyName) {
 				float moveDistance = 1f;
-				float moveXOffset = 0.8f;
+				float moveXOffset = 0.4f;
 				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 				animator.Play("Fade");
 				if (beatCounter == 0) {
 					audioManager40bpm.PlayEnemyBass();
+				}
+			} else if (enemyName == ShieldEnemyName) {
+				float moveDistance = 2f;
+				float moveXOffset = 0.8f;
+				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
+				animator.Play("Shoot");
+				if (beatCounter == 0) {
+					audioManager40bpm.PlayEnemyChords();
 				}
 			}
 
@@ -107,7 +122,7 @@ public class EnemyController : MonoBehaviour
 		float y = 0f;
 		if (enemyName == JumpEnemyName) {
 			y = Mathf.Round(position.y / gridSize) * gridSize;
-		} else if (enemyName == DashEnemyName) {
+		} else if (enemyName == DashEnemyName || enemyName == ShieldEnemyName) {
 			y = Mathf.Round((position.y - 0.5f) / gridSize) * gridSize + 0.5f;
 		}
 		return new Vector2(x, y);
@@ -115,7 +130,11 @@ public class EnemyController : MonoBehaviour
 
 	private void OnCollisionEnter2D(Collision2D collision) {
 		if (collision.gameObject.CompareTag("Player")) {
-			Destroy(collision.gameObject);
+			if (collision.gameObject.GetComponent<SpriteRenderer>().sprite.name == "PlayerShield") {
+				Destroy(gameObject);
+			} else {
+				Destroy(collision.gameObject);
+			}
 		}
 	}
 }

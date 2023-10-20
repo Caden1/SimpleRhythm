@@ -192,6 +192,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1771998225910025365, guid: 555f6805585074862ac000608dcda882, type: 3}
+      propertyPath: enemyMoveLeft
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4125332167201285563, guid: 555f6805585074862ac000608dcda882, type: 3}
       propertyPath: m_Name
       value: JumpEnemySpawnerObject

@@ -4,6 +4,9 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
+	public Sprite originalSprite;
+	public Sprite shieldSprite;
+
 	private float moveDistance = 1f;
 	private float dashDistance = 2f;
 	private float jumpForce = 5.05f;
@@ -22,6 +25,7 @@ public class PlayerController : MonoBehaviour
 	private float moveTimer = 0f;
 	private bool queueJump = false;
 	private bool queueDash = false;
+	private bool queueShield = false;
 	private float snappedRotation;
 	private float startGravity;
 	private bool addForceMovement = false;
@@ -32,11 +36,14 @@ public class PlayerController : MonoBehaviour
 	private LayerMask ignorePlayerMask; // Targets everything except Player layer
 	private AudioManager40bpm audioManager40bpm;
 	private Rigidbody2D rb;
+	private SpriteRenderer spriteRenderer;
 
 	private void Start() {
 		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
 		beatInterval = 60f / bpm;
 		rb = GetComponent<Rigidbody2D>();
+		spriteRenderer = GetComponent<SpriteRenderer>();
+		spriteRenderer.sprite = originalSprite;
 		ignorePlayerMask = ~(LayerMask.GetMask("Player") | LayerMask.GetMask("Enemy") | LayerMask.GetMask("Triggers"));
 		moveDuration = beatInterval * 0.5f;
 		startGravity = rb.gravityScale;
@@ -46,12 +53,18 @@ public class PlayerController : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W)) {
 			queueJump = true;
 			queueDash = false;
+			queueShield = false;
 		} else if (Input.GetKeyDown(KeyCode.D)) {
 			queueDash = true;
 			queueJump = false;
+			queueShield = false;
+		} else if (Input.GetKeyDown(KeyCode.S)) {
+			queueShield = true;
+			queueDash = false;
+			queueJump = false;
 		}
 
-		Vector2 raycastDirection = (moveDirection == 1) ? Vector2.right : Vector2.left;
+			Vector2 raycastDirection = (moveDirection == 1) ? Vector2.right : Vector2.left;
 		isNearWall = Physics2D.Raycast(transform.position, raycastDirection, wallCheckDistance, ignorePlayerMask);
 
 		if (isNearWall) {
@@ -64,6 +77,7 @@ public class PlayerController : MonoBehaviour
 		// Handle horizontal movement
 		if (Time.time >= nextMoveTime) {
 			rb.gravityScale = startGravity;
+			spriteRenderer.sprite = originalSprite;
 
 			if (!isGrounded) {
 				addForceMovement = true;
@@ -100,6 +114,10 @@ public class PlayerController : MonoBehaviour
 			} else if (queueDash) {
 				audioManager40bpm.PlayKickWithSnare();
 				queueDash = false;
+			} else if (queueShield) {
+				audioManager40bpm.PlayKickWithSnare();
+				spriteRenderer.sprite = shieldSprite;
+				queueShield = false;
 			} else {
 				audioManager40bpm.PlayKickNoSnare();
 			}
