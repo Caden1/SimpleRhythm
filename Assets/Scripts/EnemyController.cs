@@ -130,7 +130,7 @@ public class EnemyController : MonoBehaviour
 
 	private void OnCollisionEnter2D(Collision2D collision) {
 		if (collision.gameObject.CompareTag("Player")) {
-			if (collision.gameObject.GetComponent<SpriteRenderer>().sprite.name == "PlayerShield") {
+			if (collision.gameObject.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Shield")) {
 				Destroy(gameObject);
 			} else {
 				Destroy(collision.gameObject);
