@@ -27,6 +27,7 @@ public class EnemyController : MonoBehaviour
 	private const string JumpEnemyName = "JumpEnemy(Clone)";
 	private const string DashEnemyName = "DashEnemy(Clone)";
 	private const string ShieldEnemyName = "ShieldEnemy(Clone)";
+	private const string ProjectileEnemyName = "ProjectileEnemy(Clone)";
 
 	private void Start() {
 		enemyName = gameObject.name;
@@ -80,6 +81,11 @@ public class EnemyController : MonoBehaviour
 				if (beatCounter == 0) {
 					audioManager40bpm.PlayEnemyChords();
 				}
+			} else if (enemyName == ProjectileEnemyName) {
+				currentVelocity.x = 0f;
+				if (beatCounter == 0) {
+					audioManager40bpm.PlayEnemyMelody();
+				}
 			}
 
 			beatCounter = (beatCounter + 1) % 4;
@@ -87,28 +93,30 @@ public class EnemyController : MonoBehaviour
 			moveTimer = moveDuration;
 		}
 
-		// Perform horizontal movement
-		if (moveTimer > 0) {
-			if (enemyName == DashEnemyName) {
-				rb.gravityScale = 0f;
-				boxCollider.enabled = false;
+		if (enemyName != ProjectileEnemyName) {
+			// Perform horizontal movement
+			if (moveTimer > 0) {
+				if (enemyName == DashEnemyName) {
+					rb.gravityScale = 0f;
+					boxCollider.enabled = false;
+				}
+				rb.velocity = new Vector2(currentVelocity.x, rb.velocity.y);
+				moveTimer -= Time.deltaTime;
+			} else {
+				if (enemyName == DashEnemyName) {
+					boxCollider.enabled = true;
+					rb.gravityScale = startGravity;
+				}
+				rb.velocity = new Vector2(0f, rb.velocity.y);
 			}
-			rb.velocity = new Vector2(currentVelocity.x, rb.velocity.y);
-			moveTimer -= Time.deltaTime;
-		} else {
-			if (enemyName == DashEnemyName) {
-				boxCollider.enabled = true;
-				rb.gravityScale = startGravity;
+
+			float t = (Time.time - moveStartTime) / moveDuration;
+
+			if (t > 0.95f) {
+				StartCoroutine(HandlePositionSnap());
+				transform.position = snapToPosition;
+				animator.Play("EmptyState");
 			}
-			rb.velocity = new Vector2(0f, rb.velocity.y);
-		}
-
-		float t = (Time.time - moveStartTime) / moveDuration;
-
-		if (t > 0.95f) {
-			StartCoroutine(HandlePositionSnap());
-			transform.position = snapToPosition;
-			animator.Play("EmptyState");
 		}
 	}
 
