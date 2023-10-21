@@ -4,6 +4,8 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
+	public GameObject projectilePrefab;
+
 	private float moveDistance = 1f;
 	private float dashDistance = 2f;
 	private float jumpForce = 5.05f;
@@ -23,6 +25,7 @@ public class PlayerController : MonoBehaviour
 	private bool queueJump = false;
 	private bool queueDash = false;
 	private bool queueShield = false;
+	private bool queueProjectile = false;
 	private float snappedRotation;
 	private float startGravity;
 	private bool addForceMovement = false;
@@ -30,7 +33,7 @@ public class PlayerController : MonoBehaviour
 
 	private Vector2 snapToPosition;
 	private Vector2 currentVelocity = Vector2.zero;
-	private LayerMask ignorePlayerMask; // Targets everything except Player layer
+	private LayerMask ignoreMask;
 	private AudioManager40bpm audioManager40bpm;
 	private Rigidbody2D rb;
 	private Animator animator;
@@ -40,7 +43,7 @@ public class PlayerController : MonoBehaviour
 		beatInterval = 60f / bpm;
 		rb = GetComponent<Rigidbody2D>();
 		animator = GetComponent<Animator>();
-		ignorePlayerMask = ~(LayerMask.GetMask("Player") | LayerMask.GetMask("Enemy") | LayerMask.GetMask("Triggers"));
+		ignoreMask = ~(LayerMask.GetMask("Player") | LayerMask.GetMask("Enemy") | LayerMask.GetMask("Triggers") | LayerMask.GetMask("PlayerProjectile"));
 		moveDuration = beatInterval * 0.5f;
 		startGravity = rb.gravityScale;
 	}
@@ -50,25 +53,33 @@ public class PlayerController : MonoBehaviour
 			queueJump = true;
 			queueDash = false;
 			queueShield = false;
+			queueProjectile = false;
 		} else if (Input.GetKeyDown(KeyCode.D)) {
 			queueDash = true;
 			queueJump = false;
 			queueShield = false;
+			queueProjectile = false;
 		} else if (Input.GetKeyDown(KeyCode.S)) {
 			queueShield = true;
 			queueDash = false;
 			queueJump = false;
+			queueProjectile = false;
+		} else if (Input.GetKeyDown(KeyCode.A)) {
+			queueProjectile = true;
+			queueJump = false;
+			queueDash = false;
+			queueShield = false;
 		}
 
 		Vector2 raycastDirection = (moveDirection == 1) ? Vector2.right : Vector2.left;
-		isNearWall = Physics2D.Raycast(transform.position, raycastDirection, wallCheckDistance, ignorePlayerMask);
+		isNearWall = Physics2D.Raycast(transform.position, raycastDirection, wallCheckDistance, ignoreMask);
 
 		if (isNearWall) {
 			moveDirection *= -1;
 			return;
 		}
 
-		isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, ignorePlayerMask);
+		isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, ignoreMask);
 
 		// Handle horizontal movement
 		if (Time.time >= nextMoveTime) {
@@ -117,6 +128,10 @@ public class PlayerController : MonoBehaviour
 				audioManager40bpm.PlayKickWithSnare();
 				animator.Play("Shield");
 				queueShield = false;
+			} else if (queueProjectile) {
+				audioManager40bpm.PlayKickWithSnare();
+				Instantiate(projectilePrefab, new Vector2(transform.position.x + 1f, transform.position.y + 0.5f), projectilePrefab.transform.rotation);
+				queueProjectile = false;
 			} else {
 				audioManager40bpm.PlayKickNoSnare();
 			}

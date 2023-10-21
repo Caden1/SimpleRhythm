@@ -143,6 +143,9 @@ public class EnemyController : MonoBehaviour
 			} else {
 				Destroy(collision.gameObject);
 			}
+		} else if (collision.gameObject.CompareTag("PlayerProjectile")) {
+			Destroy(gameObject);
+			Destroy(collision.gameObject);
 		}
 	}
 }
