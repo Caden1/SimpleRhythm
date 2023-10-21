@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
 	private float moveTimer = 0f;
 	private bool queueJump = false;
 	private bool queueDash = false;
+	private bool queueShield = false;
 	private float snappedRotation;
 	private float startGravity;
 	private bool addForceMovement = false;
@@ -32,11 +33,13 @@ public class PlayerController : MonoBehaviour
 	private LayerMask ignorePlayerMask; // Targets everything except Player layer
 	private AudioManager40bpm audioManager40bpm;
 	private Rigidbody2D rb;
+	private Animator animator;
 
 	private void Start() {
 		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
 		beatInterval = 60f / bpm;
 		rb = GetComponent<Rigidbody2D>();
+		animator = GetComponent<Animator>();
 		ignorePlayerMask = ~(LayerMask.GetMask("Player") | LayerMask.GetMask("Enemy") | LayerMask.GetMask("Triggers"));
 		moveDuration = beatInterval * 0.5f;
 		startGravity = rb.gravityScale;
@@ -46,8 +49,14 @@ public class PlayerController : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W)) {
 			queueJump = true;
 			queueDash = false;
+			queueShield = false;
 		} else if (Input.GetKeyDown(KeyCode.D)) {
 			queueDash = true;
+			queueJump = false;
+			queueShield = false;
+		} else if (Input.GetKeyDown(KeyCode.S)) {
+			queueShield = true;
+			queueDash = false;
 			queueJump = false;
 		}
 
@@ -92,6 +101,10 @@ public class PlayerController : MonoBehaviour
 
 			moveTimer = moveDuration;
 
+			if (!queueShield) {
+				animator.Play("EmptyState");
+			}
+
 			// Handle jump
 			if (queueJump && isGrounded) {
 				rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
@@ -100,6 +113,10 @@ public class PlayerController : MonoBehaviour
 			} else if (queueDash) {
 				audioManager40bpm.PlayKickWithSnare();
 				queueDash = false;
+			} else if (queueShield) {
+				audioManager40bpm.PlayKickWithSnare();
+				animator.Play("Shield");
+				queueShield = false;
 			} else {
 				audioManager40bpm.PlayKickNoSnare();
 			}
