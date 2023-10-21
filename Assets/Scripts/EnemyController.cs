@@ -120,6 +120,18 @@ public class EnemyController : MonoBehaviour
 		}
 	}
 
+	private void OnDestroy() {
+		if (enemyName == JumpEnemyName) {
+			audioManager40bpm.StopEnemyDrums();
+		} else if (enemyName == DashEnemyName) {
+			audioManager40bpm.StopEnemyBass();
+		} else if (enemyName == ShieldEnemyName) {
+			audioManager40bpm.StopEnemyChords();
+		} else if (enemyName == ProjectileEnemyName) {
+			audioManager40bpm.StopEnemyMelody();
+		}
+	}
+
 	private IEnumerator HandlePositionSnap() {
 		snapToPosition = SnapToGrid(transform.position, 1f);
 		yield return null;
@@ -144,7 +156,10 @@ public class EnemyController : MonoBehaviour
 				Destroy(collision.gameObject);
 			}
 		} else if (collision.gameObject.CompareTag("PlayerProjectile")) {
-			Destroy(gameObject);
+			if (enemyName == ProjectileEnemyName) {
+				Destroy(gameObject);
+			}
+
 			Destroy(collision.gameObject);
 		}
 	}

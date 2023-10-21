@@ -99,3 +99,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 2231336649980800316, guid: c33887ddbbf6e4dda9252fdaf52b31f2, type: 3}
   enemyMoveLeft: 0
+  isSpawningOnce: 1

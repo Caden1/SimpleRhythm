@@ -35,10 +35,22 @@ public class AudioManager40bpm : MonoBehaviour
 		}
 	}
 
+	public void StopTexture() {
+		if (texture != null) {
+			textureAudioSource.Stop();
+		}
+	}
+
 	public void PlayKickNoSnare() {
 		if (kickNoSnare != null) {
 			kickNoSnareAudioSource.clip = kickNoSnare;
 			kickNoSnareAudioSource.Play();
+		}
+	}
+
+	public void StopKickNoSnare() {
+		if (kickNoSnare != null) {
+			kickNoSnareAudioSource.Stop();
 		}
 	}
 
@@ -49,10 +61,22 @@ public class AudioManager40bpm : MonoBehaviour
 		}
 	}
 
+	public void StopKickWithSnare() {
+		if (kickWithSnare != null) {
+			kickWithSnareAudioSource.Stop();
+		}
+	}
+
 	public void PlayEnemyDrums() {
 		if (enemyDrums != null) {
 			enemyDrumsAudioSource.clip = enemyDrums;
 			enemyDrumsAudioSource.Play();
+		}
+	}
+
+	public void StopEnemyDrums() {
+		if (enemyDrums != null) {
+			enemyDrumsAudioSource.Stop();
 		}
 	}
 
@@ -63,6 +87,12 @@ public class AudioManager40bpm : MonoBehaviour
 		}
 	}
 
+	public void StopEnemyBass() {
+		if (enemyBass != null) {
+			enemyBassAudioSource.Stop();
+		}
+	}
+
 	public void PlayEnemyChords() {
 		if (enemyChords != null) {
 			enemyChordsAudioSource.clip = enemyChords;
@@ -70,10 +100,22 @@ public class AudioManager40bpm : MonoBehaviour
 		}
 	}
 
+	public void StopEnemyChords() {
+		if (enemyChords != null) {
+			enemyChordsAudioSource.Stop();
+		}
+	}
+
 	public void PlayEnemyMelody() {
 		if (enemyMelody != null) {
 			enemyMelodyAudioSource.clip = enemyMelody;
 			enemyMelodyAudioSource.Play();
+		}
+	}
+
+	public void StopEnemyMelody() {
+		if (enemyMelody != null) {
+			enemyMelodyAudioSource.Stop();
 		}
 	}
 }

@@ -130,8 +130,16 @@ public class PlayerController : MonoBehaviour
 				queueShield = false;
 			} else if (queueProjectile) {
 				audioManager40bpm.PlayKickWithSnare();
-				Instantiate(projectilePrefab, new Vector2(transform.position.x + 1f, transform.position.y + 0.5f), projectilePrefab.transform.rotation);
 				queueProjectile = false;
+				if (moveDirection == 1) {
+					GameObject projectileClone = Instantiate(
+						projectilePrefab, new Vector2(transform.position.x + 1f, transform.position.y + 0.5f), projectilePrefab.transform.rotation);
+					projectileClone.GetComponent<SpriteRenderer>().flipX = false;
+				} else {
+					GameObject projectileClone = Instantiate(
+						projectilePrefab, new Vector2(transform.position.x - 1f, transform.position.y + 0.5f), projectilePrefab.transform.rotation);
+					projectileClone.GetComponent<SpriteRenderer>().flipX = true;
+				}
 			} else {
 				audioManager40bpm.PlayKickNoSnare();
 			}
@@ -166,6 +174,10 @@ public class PlayerController : MonoBehaviour
 				rb.gravityScale = 0f;
 			}
 		}
+	}
+
+	private void OnDestroy() {
+		audioManager40bpm.StopTexture();
 	}
 
 	private IEnumerator HandleRotateSnap() {
