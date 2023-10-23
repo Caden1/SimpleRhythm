@@ -108,6 +108,12 @@ public class PlayerController : MonoBehaviour
 				audioManager40bpm.PlayTexture();
 			}
 
+			if (beatCounter % 2 == 0) {
+				audioManager40bpm.PlayKickNoSnare();
+			} else {
+				audioManager40bpm.PlayKickWithSnare();
+			}
+
 			beatCounter = (beatCounter + 1) % 4;
 
 			moveTimer = moveDuration;
@@ -119,17 +125,18 @@ public class PlayerController : MonoBehaviour
 			// Handle jump
 			if (queueJump && isGrounded) {
 				rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
-				audioManager40bpm.PlayKickWithSnare();
+				audioManager40bpm.PlayPlayerJumpShaker();
+				//audioManager40bpm.PlayKickWithSnare();
 				queueJump = false;
 			} else if (queueDash) {
-				audioManager40bpm.PlayKickWithSnare();
+				//audioManager40bpm.PlayKickWithSnare();
 				queueDash = false;
 			} else if (queueShield) {
-				audioManager40bpm.PlayKickWithSnare();
+				//audioManager40bpm.PlayKickWithSnare();
 				animator.Play("Shield");
 				queueShield = false;
 			} else if (queueProjectile) {
-				audioManager40bpm.PlayKickWithSnare();
+				//audioManager40bpm.PlayKickWithSnare();
 				queueProjectile = false;
 				if (moveDirection == 1) {
 					GameObject projectileClone = Instantiate(
@@ -141,7 +148,7 @@ public class PlayerController : MonoBehaviour
 					projectileClone.GetComponent<SpriteRenderer>().flipX = true;
 				}
 			} else {
-				audioManager40bpm.PlayKickNoSnare();
+				//audioManager40bpm.PlayKickNoSnare();
 			}
 		}
 

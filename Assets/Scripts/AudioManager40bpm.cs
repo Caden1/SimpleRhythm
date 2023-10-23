@@ -5,6 +5,7 @@ public class AudioManager40bpm : MonoBehaviour
 	public AudioClip texture;
 	public AudioClip kickNoSnare;
 	public AudioClip kickWithSnare;
+	public AudioClip playerJumpShaker;
 	public AudioClip enemyDrums;
 	public AudioClip enemyBass;
 	public AudioClip enemyChords;
@@ -13,6 +14,7 @@ public class AudioManager40bpm : MonoBehaviour
 	private AudioSource kickNoSnareAudioSource;
 	private AudioSource kickWithSnareAudioSource;
 	private AudioSource textureAudioSource;
+	private AudioSource playerJumpShakerAudioSource;
 	private AudioSource enemyDrumsAudioSource;
 	private AudioSource enemyBassAudioSource;
 	private AudioSource enemyChordsAudioSource;
@@ -22,6 +24,7 @@ public class AudioManager40bpm : MonoBehaviour
 		textureAudioSource = gameObject.AddComponent<AudioSource>();
 		kickNoSnareAudioSource = gameObject.AddComponent<AudioSource>();
 		kickWithSnareAudioSource = gameObject.AddComponent<AudioSource>();
+		playerJumpShakerAudioSource = gameObject.AddComponent<AudioSource>();
 		enemyDrumsAudioSource = gameObject.AddComponent<AudioSource>();
 		enemyBassAudioSource = gameObject.AddComponent<AudioSource>();
 		enemyChordsAudioSource = gameObject.AddComponent<AudioSource>();
@@ -64,6 +67,19 @@ public class AudioManager40bpm : MonoBehaviour
 	public void StopKickWithSnare() {
 		if (kickWithSnare != null) {
 			kickWithSnareAudioSource.Stop();
+		}
+	}
+
+	public void PlayPlayerJumpShaker() {
+		if (playerJumpShaker != null) {
+			playerJumpShakerAudioSource.clip = playerJumpShaker;
+			playerJumpShakerAudioSource.Play();
+		}
+	}
+
+	public void StopPlayerJumpShaker() {
+		if (playerJumpShaker != null) {
+			playerJumpShakerAudioSource.Stop();
 		}
 	}
 
