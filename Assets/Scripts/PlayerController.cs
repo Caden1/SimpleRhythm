@@ -50,22 +50,38 @@ public class PlayerController : MonoBehaviour
 
 	private void Update() {
 		if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W)) {
-			queueJump = true;
+			if (queueJump) {
+				queueJump = false;
+			} else {
+				queueJump = true;
+			}
 			queueDash = false;
 			queueShield = false;
 			queueProjectile = false;
 		} else if (Input.GetKeyDown(KeyCode.D)) {
-			queueDash = true;
+			if (queueDash) {
+				queueDash = false;
+			} else {
+				queueDash = true;
+			}
 			queueJump = false;
 			queueShield = false;
 			queueProjectile = false;
 		} else if (Input.GetKeyDown(KeyCode.S)) {
-			queueShield = true;
+			if (queueShield) {
+				queueShield = false;
+			} else {
+				queueShield = true;
+			}
 			queueDash = false;
 			queueJump = false;
 			queueProjectile = false;
 		} else if (Input.GetKeyDown(KeyCode.A)) {
-			queueProjectile = true;
+			if (queueProjectile) {
+				queueProjectile = false;
+			} else {
+				queueProjectile = true;
+			}
 			queueJump = false;
 			queueDash = false;
 			queueShield = false;
