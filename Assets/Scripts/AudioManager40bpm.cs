@@ -3,29 +3,41 @@ using UnityEngine;
 public class AudioManager40bpm : MonoBehaviour
 {
 	public AudioClip texture;
-	public AudioClip kickNoSnare;
+	public AudioClip kick;
 	public AudioClip kickWithSnare;
 	public AudioClip enemyDrums;
 	public AudioClip enemyBass;
 	public AudioClip enemyChords;
 	public AudioClip enemyMelody;
+	public AudioClip playerJump;
+	public AudioClip playerShield;
+	public AudioClip playerDash;
+	public AudioClip playerProjectile;
 
-	private AudioSource kickNoSnareAudioSource;
+	private AudioSource kickAudioSource;
 	private AudioSource kickWithSnareAudioSource;
 	private AudioSource textureAudioSource;
 	private AudioSource enemyDrumsAudioSource;
 	private AudioSource enemyBassAudioSource;
 	private AudioSource enemyChordsAudioSource;
 	private AudioSource enemyMelodyAudioSource;
+	private AudioSource playerJumpAudioSource;
+	private AudioSource playerShieldAudioSource;
+	private AudioSource playerDashAudioSource;
+	private AudioSource playerProjectileAudioSource;
 
 	private void Awake() {
 		textureAudioSource = gameObject.AddComponent<AudioSource>();
-		kickNoSnareAudioSource = gameObject.AddComponent<AudioSource>();
+		kickAudioSource = gameObject.AddComponent<AudioSource>();
 		kickWithSnareAudioSource = gameObject.AddComponent<AudioSource>();
 		enemyDrumsAudioSource = gameObject.AddComponent<AudioSource>();
 		enemyBassAudioSource = gameObject.AddComponent<AudioSource>();
 		enemyChordsAudioSource = gameObject.AddComponent<AudioSource>();
 		enemyMelodyAudioSource = gameObject.AddComponent<AudioSource>();
+		playerJumpAudioSource = gameObject.AddComponent<AudioSource>();
+		playerShieldAudioSource = gameObject.AddComponent<AudioSource>();
+		playerDashAudioSource = gameObject.AddComponent<AudioSource>();
+		playerProjectileAudioSource = gameObject.AddComponent<AudioSource>();
 	}
 
 	public void PlayTexture() {
@@ -41,16 +53,10 @@ public class AudioManager40bpm : MonoBehaviour
 		}
 	}
 
-	public void PlayKickNoSnare() {
-		if (kickNoSnare != null) {
-			kickNoSnareAudioSource.clip = kickNoSnare;
-			kickNoSnareAudioSource.Play();
-		}
-	}
-
-	public void StopKickNoSnare() {
-		if (kickNoSnare != null) {
-			kickNoSnareAudioSource.Stop();
+	public void PlayKick() {
+		if (kick != null) {
+			kickAudioSource.clip = kick;
+			kickAudioSource.Play();
 		}
 	}
 
@@ -58,12 +64,6 @@ public class AudioManager40bpm : MonoBehaviour
 		if (kickWithSnare != null) {
 			kickWithSnareAudioSource.clip = kickWithSnare;
 			kickWithSnareAudioSource.Play();
-		}
-	}
-
-	public void StopKickWithSnare() {
-		if (kickWithSnare != null) {
-			kickWithSnareAudioSource.Stop();
 		}
 	}
 
@@ -116,6 +116,34 @@ public class AudioManager40bpm : MonoBehaviour
 	public void StopEnemyMelody() {
 		if (enemyMelody != null) {
 			enemyMelodyAudioSource.Stop();
+		}
+	}
+
+	public void PlayPlayerJump() {
+		if (playerJump != null) {
+			playerJumpAudioSource.clip = playerJump;
+			playerJumpAudioSource.Play();
+		}
+	}
+	
+	public void PlayPlayerShield() {
+		if (playerShield != null) {
+			playerShieldAudioSource.clip = playerShield;
+			playerShieldAudioSource.Play();
+		}
+	}
+
+	public void PlayPlayerDash() {
+		if (playerDash != null) {
+			playerDashAudioSource.clip = playerDash;
+			playerDashAudioSource.Play();
+		}
+	}
+
+	public void PlayPlayerProjectile() {
+		if (playerProjectile != null) {
+			playerProjectileAudioSource.clip = playerProjectile;
+			playerProjectileAudioSource.Play();
 		}
 	}
 }
