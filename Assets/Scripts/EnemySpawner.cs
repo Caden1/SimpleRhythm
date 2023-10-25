@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
@@ -20,8 +19,6 @@ public class EnemySpawner : MonoBehaviour
 	private BossController bossController;
 
 	private const string JumpEnemyName = "JumpEnemy";
-	private const string DashEnemyName = "DashEnemy";
-	private const string ShieldEnemyName = "ShieldEnemy";
 	private const string ProjectileEnemyName = "ProjectileEnemy";
 
 	private void Start() {

@@ -44,11 +44,6 @@ public class BossController : MonoBehaviour
 
 			switch (barCounter) {
 				case 0:
-					if (beatCounter == 0) {
-						Instantiate(shieldEnemyPrefab,
-							new Vector2(gameObject.transform.position.x, gameObject.transform.position.y - 1.5f),
-							shieldEnemyPrefab.transform.rotation);
-					}
 					if (beatCounter == 3) {
 						activateJumpEnemy = true; // Set up to activate on bar 1
 						animator.Play("CloseEye");
@@ -64,11 +59,15 @@ public class BossController : MonoBehaviour
 				case 2:
 					if (beatCounter == 3) {
 						activateProjectileEnemy = true;
+						animator.Play("CloseEye");
 					}
 					break;
 				case 3:
 					if (beatCounter == 0) {
+						animator.Play("ActivateProjectileEnemies");
 						activateProjectileEnemy = false;
+					} else if (beatCounter == 1) {
+						animator.Play("EmptyState");
 					}
 					break;
 				case 4:
@@ -77,12 +76,40 @@ public class BossController : MonoBehaviour
 					}
 					break;
 				case 5:
+					if (beatCounter == 3) {
+						animator.Play("CloseEye");
+					}
 					break;
 				case 6:
+					if (beatCounter == 0) {
+						Instantiate(shieldEnemyPrefab,
+							new Vector2(gameObject.transform.position.x, gameObject.transform.position.y - 1.5f),
+							shieldEnemyPrefab.transform.rotation);
+						animator.Play("ActivateShieldEnemies");
+					} else if (beatCounter == 1) {
+						animator.Play("EmptyState");
+					}
 					break;
 				case 7:
 					break;
 				case 8:
+					break;
+				case 9:
+					if (beatCounter == 3) {
+						animator.Play("CloseEye");
+					}
+					break;
+				case 10:
+					if (beatCounter == 0) {
+						animator.Play("Dash");
+						// Call function that handles dash logic
+					} else if (beatCounter == 1) {
+						animator.Play("EmptyState");
+					}
+					break;
+				case 11:
+					break;
+				case 12:
 					break;
 			}
 
