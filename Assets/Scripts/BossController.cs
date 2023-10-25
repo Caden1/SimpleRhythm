@@ -3,6 +3,9 @@ using System.Collections;
 
 public class BossController : MonoBehaviour
 {
+	[HideInInspector]
+	public bool activateJumpEnemy = false;
+
 	private float bpm = 40f;
 	private float beatInterval;
 	private float nextMoveTime = 0f;
@@ -15,11 +18,12 @@ public class BossController : MonoBehaviour
 	private AudioManager40bpm audioManager40bpm;
 	private int beatCounter = 0;
 	private Animator animator;
-	private BoxCollider2D boxCollider;
+	private CircleCollider2D circleCollider;
 	private float startGravity;
+	private int barCounter = 0;
 
 	private void Start() {
-		boxCollider = GetComponent<BoxCollider2D>();
+		circleCollider = GetComponent<CircleCollider2D>();
 		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
 		beatInterval = 60f / bpm;
 		moveDuration = beatInterval * 0.5f;
@@ -32,6 +36,41 @@ public class BossController : MonoBehaviour
 		if (Time.time >= nextMoveTime) {
 			moveStartTime = Time.time;
 			nextMoveTime = Time.time + beatInterval;
+
+			if (beatCounter == 0) {
+				barCounter = (barCounter + 1) % 32; // 32 bars in total, then the boss loop repeats
+			}
+
+			switch (barCounter) {
+				case 1:
+					if (beatCounter == 3) {
+						activateJumpEnemy = true; // Set upp to activate on bar 2
+						animator.Play("CloseEye");
+					}
+					break;
+				case 2:
+					animator.Play("ActivateJumpEnemies");
+					break;
+				case 3:
+					animator.Play("EmptyState");
+					break;
+				case 4:
+					break;
+				case 5:
+					activateJumpEnemy = false;
+					break;
+				case 6:
+					break;
+				case 7:
+					break;
+				case 8:
+					break;
+			}
+
+			float moveDistance = 1f;
+			float moveXOffset = 0.4f;
+			int moveDirection = -1;
+			currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 
 			beatCounter = (beatCounter + 1) % 4;
 
@@ -60,7 +99,7 @@ public class BossController : MonoBehaviour
 
 	private Vector2 SnapToGrid(Vector2 position, float gridSize) {
 		float x = Mathf.Round(position.x / gridSize) * gridSize;
-		float y = Mathf.Round(position.y / gridSize) * gridSize;
+		float y = Mathf.Round((position.y - 0.5f) / gridSize) * gridSize + 0.5f;
 		return new Vector2(x, y);
 	}
 
