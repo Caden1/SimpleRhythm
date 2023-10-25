@@ -3,8 +3,10 @@ using System.Collections;
 
 public class BossController : MonoBehaviour
 {
-	[HideInInspector]
-	public bool activateJumpEnemy = false;
+	[HideInInspector] public bool activateJumpEnemy = false;
+	[HideInInspector] public bool activateProjectileEnemy = false;
+
+	public GameObject shieldEnemyPrefab;
 
 	private float bpm = 40f;
 	private float beatInterval;
@@ -12,6 +14,9 @@ public class BossController : MonoBehaviour
 	private float moveStartTime;
 	private float moveDuration;
 	private float moveTimer = 0f;
+	private float moveDistance = 0f;
+	private float moveXOffset = 0f;
+	private int moveDirection = 0;
 	private Vector2 snapToPosition;
 	private Vector2 currentVelocity = Vector2.zero;
 	private Rigidbody2D rb;
@@ -37,27 +42,41 @@ public class BossController : MonoBehaviour
 			moveStartTime = Time.time;
 			nextMoveTime = Time.time + beatInterval;
 
-			if (beatCounter == 0) {
-				barCounter = (barCounter + 1) % 32; // 32 bars in total, then the boss loop repeats
-			}
-
 			switch (barCounter) {
-				case 1:
+				case 0:
+					if (beatCounter == 0) {
+						Instantiate(shieldEnemyPrefab,
+							new Vector2(gameObject.transform.position.x, gameObject.transform.position.y - 1.5f),
+							shieldEnemyPrefab.transform.rotation);
+					}
 					if (beatCounter == 3) {
-						activateJumpEnemy = true; // Set upp to activate on bar 2
+						activateJumpEnemy = true; // Set up to activate on bar 1
 						animator.Play("CloseEye");
 					}
 					break;
+				case 1:
+					if (beatCounter == 0) {
+						animator.Play("ActivateJumpEnemies");
+					} else if (beatCounter == 1) {
+						animator.Play("EmptyState");
+					}
+					break;
 				case 2:
-					animator.Play("ActivateJumpEnemies");
+					if (beatCounter == 3) {
+						activateProjectileEnemy = true;
+					}
 					break;
 				case 3:
-					animator.Play("EmptyState");
+					if (beatCounter == 0) {
+						activateProjectileEnemy = false;
+					}
 					break;
 				case 4:
+					if (beatCounter == 3) {
+						activateJumpEnemy = false; // Set up to deactivate on bar 5
+					}
 					break;
 				case 5:
-					activateJumpEnemy = false;
 					break;
 				case 6:
 					break;
@@ -67,12 +86,13 @@ public class BossController : MonoBehaviour
 					break;
 			}
 
-			float moveDistance = 1f;
-			float moveXOffset = 0.4f;
-			int moveDirection = -1;
 			currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 
 			beatCounter = (beatCounter + 1) % 4;
+
+			if (beatCounter == 0) {
+				barCounter = (barCounter + 1) % 32; // 32 bars in total, then the boss loop repeats
+			}
 
 			moveTimer = moveDuration;
 		}

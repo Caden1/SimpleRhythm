@@ -15,10 +15,17 @@ public class EnemySpawner : MonoBehaviour
 	private bool isSpawned = false;
 	private Vector2 spawnPoint;
 	private float beatInterval;
+	private string enemyName;
 
 	private BossController bossController;
 
+	private const string JumpEnemyName = "JumpEnemy";
+	private const string DashEnemyName = "DashEnemy";
+	private const string ShieldEnemyName = "ShieldEnemy";
+	private const string ProjectileEnemyName = "ProjectileEnemy";
+
 	private void Start() {
+		enemyName = enemyPrefab.name;
 		beatInterval = 60f / bpm;
 		spawnPoint = gameObject.transform.position;
 		enemyPrefab.GetComponent<EnemyController>().moveLeft = enemyMoveLeft;
@@ -29,7 +36,9 @@ public class EnemySpawner : MonoBehaviour
 		if (Time.time >= nextMoveTime) {
 			if (isScriptActive && beatCounter == 0 && !isSpawned) {
 				if (isBossControlled && bossController != null) {
-					if (bossController.activateJumpEnemy) {
+					if (enemyName == JumpEnemyName && bossController.activateJumpEnemy) {
+						Instantiate(enemyPrefab, spawnPoint, enemyPrefab.transform.rotation);
+					} else if (enemyName == ProjectileEnemyName && bossController.activateProjectileEnemy) {
 						Instantiate(enemyPrefab, spawnPoint, enemyPrefab.transform.rotation);
 					}
 				} else {
