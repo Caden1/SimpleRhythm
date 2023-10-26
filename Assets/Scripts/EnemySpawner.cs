@@ -16,6 +16,7 @@ public class EnemySpawner : MonoBehaviour
 	private float beatInterval;
 	private string enemyName;
 
+	private GameObject boss;
 	private BossController bossController;
 
 	private const string JumpEnemyName = "JumpEnemy";
@@ -26,7 +27,10 @@ public class EnemySpawner : MonoBehaviour
 		beatInterval = 60f / bpm;
 		spawnPoint = gameObject.transform.position;
 		enemyPrefab.GetComponent<EnemyController>().moveLeft = enemyMoveLeft;
-		bossController = GameObject.FindGameObjectWithTag("Boss").GetComponent<BossController>();
+		boss = GameObject.FindGameObjectWithTag("Boss");
+		if (boss != null) {
+			bossController = boss.GetComponent<BossController>();
+		}
 	}
 
 	private void Update() {

@@ -18,17 +18,12 @@ public class BossShieldEnemy : MonoBehaviour
 	private Vector2 snapToPosition;
 	private Animator animator;
 	private AudioManager40bpm audioManager40bpm;
-	private static Dictionary<string, int> bossShieldEnemyCount = new Dictionary<string, int>();
 
 	private void Start() {
 		player = GameObject.FindGameObjectWithTag("Player");
 		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
 		rb = GetComponent<Rigidbody2D>();
 		enemyName = gameObject.name;
-		if (!bossShieldEnemyCount.ContainsKey(enemyName)) {
-			bossShieldEnemyCount[enemyName] = 0;
-		}
-		bossShieldEnemyCount[enemyName]++;
 		beatInterval = 60f / bpm;
 		moveDuration = beatInterval * 0.5f;
 		animator = GetComponent<Animator>();
@@ -89,15 +84,6 @@ public class BossShieldEnemy : MonoBehaviour
 			StartCoroutine(HandlePositionSnap());
 			transform.position = snapToPosition;
 			animator.Play("EmptyState");
-		}
-	}
-
-	private void OnDestroy() {
-		if (bossShieldEnemyCount.ContainsKey(enemyName)) {
-			bossShieldEnemyCount[enemyName]--;
-		}
-		if (bossShieldEnemyCount[enemyName] <= 0) {
-			audioManager40bpm.StopEnemyChords();
 		}
 	}
 

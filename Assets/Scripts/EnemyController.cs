@@ -25,6 +25,8 @@ public class EnemyController : MonoBehaviour
 	private BoxCollider2D boxCollider;
 	private float startGravity;
 
+	private GameObject boss;
+
 	private const string JumpEnemyName = "JumpEnemy(Clone)";
 	private const string DashEnemyName = "DashEnemy(Clone)";
 	private const string ShieldEnemyName = "ShieldEnemy(Clone)";
@@ -36,6 +38,7 @@ public class EnemyController : MonoBehaviour
 	private static Dictionary<string, int> projectileEnemyCount = new Dictionary<string, int>();
 
 	private void Start() {
+		boss = GameObject.FindGameObjectWithTag("Boss");
 		enemyName = gameObject.name;
 		boxCollider = GetComponent<BoxCollider2D>();
 		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
@@ -45,23 +48,25 @@ public class EnemyController : MonoBehaviour
 		animator = GetComponent<Animator>();
 		startGravity = rb.gravityScale;
 
-		if (!jumpEnemyCount.ContainsKey(enemyName)) {
-			jumpEnemyCount[enemyName] = 0;
-		}
-		if (!dashEnemyCount.ContainsKey(enemyName)) {
-			dashEnemyCount[enemyName] = 0;
-		}
-		if (!shieldEnemyCount.ContainsKey(enemyName)) {
-			shieldEnemyCount[enemyName] = 0;
-		}
-		if (!projectileEnemyCount.ContainsKey(enemyName)) {
-			projectileEnemyCount[enemyName] = 0;
-		}
+		if (boss == null) {
+			if (!jumpEnemyCount.ContainsKey(enemyName)) {
+				jumpEnemyCount[enemyName] = 0;
+			}
+			if (!dashEnemyCount.ContainsKey(enemyName)) {
+				dashEnemyCount[enemyName] = 0;
+			}
+			if (!shieldEnemyCount.ContainsKey(enemyName)) {
+				shieldEnemyCount[enemyName] = 0;
+			}
+			if (!projectileEnemyCount.ContainsKey(enemyName)) {
+				projectileEnemyCount[enemyName] = 0;
+			}
 
-		jumpEnemyCount[enemyName]++;
-		dashEnemyCount[enemyName]++;
-		shieldEnemyCount[enemyName]++;
-		projectileEnemyCount[enemyName]++;
+			jumpEnemyCount[enemyName]++;
+			dashEnemyCount[enemyName]++;
+			shieldEnemyCount[enemyName]++;
+			projectileEnemyCount[enemyName]++;
+		}
 
 		if (moveLeft) {
 			moveDirection = -1;
@@ -89,7 +94,11 @@ public class EnemyController : MonoBehaviour
 				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 				animator.Play("Pulse");
 				if (beatCounter == 0) {
-					audioManager40bpm.PlayEnemyDrums();
+					if (boss == null) {
+						audioManager40bpm.PlayEnemyDrums();
+					} else {
+						audioManager40bpm.LoopEnemyDrums();
+					}
 				}
 			} else if (enemyName == DashEnemyName) {
 				float moveDistance = 1f;
@@ -97,7 +106,11 @@ public class EnemyController : MonoBehaviour
 				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 				animator.Play("Fade");
 				if (beatCounter == 0) {
-					audioManager40bpm.PlayEnemyBass();
+					if (boss == null) {
+						audioManager40bpm.PlayEnemyBass();
+					} else {
+						audioManager40bpm.LoopEnemyBass();
+					}
 				}
 			} else if (enemyName == ShieldEnemyName) {
 				float moveDistance = 2f;
@@ -105,12 +118,20 @@ public class EnemyController : MonoBehaviour
 				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 				animator.Play("Shoot");
 				if (beatCounter == 0) {
-					audioManager40bpm.PlayEnemyChords();
+					if (boss == null) {
+						audioManager40bpm.PlayEnemyChords();
+					} else {
+						audioManager40bpm.LoopEnemyChords();
+					}
 				}
 			} else if (enemyName == ProjectileEnemyName) {
 				currentVelocity.x = 0f;
 				if (beatCounter == 0) {
-					audioManager40bpm.PlayEnemyMelody();
+					if (boss == null) {
+						audioManager40bpm.PlayEnemyMelody();
+					} else {
+						audioManager40bpm.LoopEnemyMelody();
+					}
 				}
 			}
 
@@ -147,29 +168,31 @@ public class EnemyController : MonoBehaviour
 	}
 
 	private void OnDestroy() {
-		if (jumpEnemyCount.ContainsKey(enemyName)) {
-			jumpEnemyCount[enemyName]--;
-		}
-		if (dashEnemyCount.ContainsKey(enemyName)) {
-			dashEnemyCount[enemyName]--;
-		}
-		if (shieldEnemyCount.ContainsKey(enemyName)) {
-			shieldEnemyCount[enemyName]--;
-		}
-		if (projectileEnemyCount.ContainsKey(enemyName)) {
-			projectileEnemyCount[enemyName]--;
-		}
-		if (jumpEnemyCount[enemyName] <= 0) {
-			audioManager40bpm.StopEnemyDrums();
-		}
-		if (dashEnemyCount[enemyName] <= 0) {
-			audioManager40bpm.StopEnemyBass();
-		}
-		if (shieldEnemyCount[enemyName] <= 0) {
-			audioManager40bpm.StopEnemyChords();
-		}
-		if (projectileEnemyCount[enemyName] <= 0) {
-			audioManager40bpm.StopEnemyMelody();
+		if (boss == null) {
+			if (jumpEnemyCount.ContainsKey(enemyName)) {
+				jumpEnemyCount[enemyName]--;
+			}
+			if (dashEnemyCount.ContainsKey(enemyName)) {
+				dashEnemyCount[enemyName]--;
+			}
+			if (shieldEnemyCount.ContainsKey(enemyName)) {
+				shieldEnemyCount[enemyName]--;
+			}
+			if (projectileEnemyCount.ContainsKey(enemyName)) {
+				projectileEnemyCount[enemyName]--;
+			}
+			if (jumpEnemyCount[enemyName] <= 0) {
+				audioManager40bpm.StopEnemyDrums();
+			}
+			if (dashEnemyCount[enemyName] <= 0) {
+				audioManager40bpm.StopEnemyBass();
+			}
+			if (shieldEnemyCount[enemyName] <= 0) {
+				audioManager40bpm.StopEnemyChords();
+			}
+			if (projectileEnemyCount[enemyName] <= 0) {
+				audioManager40bpm.StopEnemyMelody();
+			}
 		}
 	}
 

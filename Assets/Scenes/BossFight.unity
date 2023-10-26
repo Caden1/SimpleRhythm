@@ -132,6 +132,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1771998225910025365, guid: 555f6805585074862ac000608dcda882, type: 3}
+      propertyPath: enemyMoveLeft
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1771998225910025365, guid: 555f6805585074862ac000608dcda882, type: 3}
       propertyPath: isBossControlled
       value: 1
       objectReference: {fileID: 0}
@@ -145,7 +149,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7046343711964828593, guid: 555f6805585074862ac000608dcda882, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -11
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 7046343711964828593, guid: 555f6805585074862ac000608dcda882, type: 3}
       propertyPath: m_LocalPosition.y
@@ -401,7 +405,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8964971471513127967, guid: 181e04114bcbb4a2fa3cba93b7a9f4c2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10
+      value: -4
       objectReference: {fileID: 0}
     - target: {fileID: 8964971471513127967, guid: 181e04114bcbb4a2fa3cba93b7a9f4c2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -592,7 +596,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8964971471513127967, guid: 181e04114bcbb4a2fa3cba93b7a9f4c2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 6
+      value: -8
       objectReference: {fileID: 0}
     - target: {fileID: 8964971471513127967, guid: 181e04114bcbb4a2fa3cba93b7a9f4c2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -710,7 +714,7 @@ GameObject:
   - component: {fileID: 1766582652}
   - component: {fileID: 1766582653}
   - component: {fileID: 1766582654}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Boss1
   m_TagString: Boss
   m_Icon: {fileID: 0}
@@ -777,7 +781,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1766582647}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4.5, z: 0}
+  m_LocalPosition: {x: 9, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

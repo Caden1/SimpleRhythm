@@ -74,6 +74,14 @@ public class AudioManager40bpm : MonoBehaviour
 		}
 	}
 
+	public void LoopEnemyDrums() {
+		if (enemyDrums != null) {
+			enemyDrumsAudioSource.clip = enemyDrums;
+			enemyDrumsAudioSource.loop = true;
+			enemyDrumsAudioSource.Play();
+		}
+	}
+
 	public void StopEnemyDrums() {
 		if (enemyDrums != null) {
 			enemyDrumsAudioSource.Stop();
@@ -81,6 +89,13 @@ public class AudioManager40bpm : MonoBehaviour
 	}
 
 	public void PlayEnemyBass() {
+		if (enemyBass != null) {
+			enemyBassAudioSource.clip = enemyBass;
+			enemyBassAudioSource.Play();
+		}
+	}
+
+	public void LoopEnemyBass() {
 		if (enemyBass != null) {
 			enemyBassAudioSource.clip = enemyBass;
 			enemyBassAudioSource.Play();
@@ -100,6 +115,13 @@ public class AudioManager40bpm : MonoBehaviour
 		}
 	}
 
+	public void LoopEnemyChords() {
+		if (enemyChords != null) {
+			enemyChordsAudioSource.clip = enemyChords;
+			enemyChordsAudioSource.Play();
+		}
+	}
+
 	public void StopEnemyChords() {
 		if (enemyChords != null) {
 			enemyChordsAudioSource.Stop();
@@ -107,6 +129,13 @@ public class AudioManager40bpm : MonoBehaviour
 	}
 
 	public void PlayEnemyMelody() {
+		if (enemyMelody != null) {
+			enemyMelodyAudioSource.clip = enemyMelody;
+			enemyMelodyAudioSource.Play();
+		}
+	}
+
+	public void LoopEnemyMelody() {
 		if (enemyMelody != null) {
 			enemyMelodyAudioSource.clip = enemyMelody;
 			enemyMelodyAudioSource.Play();
