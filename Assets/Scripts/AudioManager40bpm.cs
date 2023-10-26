@@ -98,6 +98,7 @@ public class AudioManager40bpm : MonoBehaviour
 	public void LoopEnemyBass() {
 		if (enemyBass != null) {
 			enemyBassAudioSource.clip = enemyBass;
+			enemyBassAudioSource.loop = true;
 			enemyBassAudioSource.Play();
 		}
 	}
@@ -118,6 +119,7 @@ public class AudioManager40bpm : MonoBehaviour
 	public void LoopEnemyChords() {
 		if (enemyChords != null) {
 			enemyChordsAudioSource.clip = enemyChords;
+			enemyChordsAudioSource.loop = true;
 			enemyChordsAudioSource.Play();
 		}
 	}
@@ -138,6 +140,7 @@ public class AudioManager40bpm : MonoBehaviour
 	public void LoopEnemyMelody() {
 		if (enemyMelody != null) {
 			enemyMelodyAudioSource.clip = enemyMelody;
+			enemyMelodyAudioSource.loop = true;
 			enemyMelodyAudioSource.Play();
 		}
 	}

@@ -61,7 +61,7 @@ public class BossShieldEnemy : MonoBehaviour
 
 			animator.Play("Shoot");
 			if (beatCounter == 0) {
-				audioManager40bpm.PlayEnemyChords();
+				audioManager40bpm.LoopEnemyChords();
 			}
 
 			beatCounter = (beatCounter + 1) % 4;

@@ -39,7 +39,9 @@ public class EnemySpawner : MonoBehaviour
 				if (isBossControlled && bossController != null) {
 					if (enemyName == JumpEnemyName && bossController.activateJumpEnemy) {
 						Instantiate(enemyPrefab, spawnPoint, enemyPrefab.transform.rotation);
-					} else if (enemyName == ProjectileEnemyName && bossController.activateProjectileEnemy) {
+					}
+
+					if (enemyName == ProjectileEnemyName && bossController.activateProjectileEnemy) {
 						Instantiate(enemyPrefab, spawnPoint, enemyPrefab.transform.rotation);
 					}
 				} else {

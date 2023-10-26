@@ -87,18 +87,19 @@ public class PlayerController : MonoBehaviour
 			queueShield = false;
 		}
 
-		Vector2 raycastDirection = (moveDirection == 1) ? Vector2.right : Vector2.left;
-		isNearWall = Physics2D.Raycast(transform.position, raycastDirection, wallCheckDistance, ignoreMask);
-
-		if (isNearWall) {
-			moveDirection *= -1;
-			return;
-		}
-
 		isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, ignoreMask);
 
 		// Handle horizontal movement
 		if (Time.time >= nextMoveTime) {
+			Vector2 raycastDirection = (moveDirection == 1) ? Vector2.right : Vector2.left;
+			isNearWall = Physics2D.Raycast(transform.position, raycastDirection, wallCheckDistance, ignoreMask);
+
+			if (isNearWall) {
+				moveDirection *= -1;
+			}
+
+			//isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, ignoreMask);
+
 			rb.gravityScale = startGravity;
 
 			if (!isGrounded) {
