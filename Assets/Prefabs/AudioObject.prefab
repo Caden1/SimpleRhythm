@@ -55,3 +55,4 @@ MonoBehaviour:
   playerShield: {fileID: 8300000, guid: ec4f84df6674f4bf380774381dbf495a, type: 3}
   playerDash: {fileID: 8300000, guid: e294f9df7ae70425f9efd3c91041ea74, type: 3}
   playerProjectile: {fileID: 8300000, guid: 9bd8c04be109f426ba3542916e0452ff, type: 3}
+  bossCounterMelody: {fileID: 8300000, guid: 0e3745b6b993b47d7a1611d4255f0a74, type: 3}

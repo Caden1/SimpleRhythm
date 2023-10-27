@@ -13,6 +13,7 @@ public class AudioManager40bpm : MonoBehaviour
 	public AudioClip playerShield;
 	public AudioClip playerDash;
 	public AudioClip playerProjectile;
+	public AudioClip bossCounterMelody;
 
 	private AudioSource kickAudioSource;
 	private AudioSource kickWithSnareAudioSource;
@@ -25,6 +26,7 @@ public class AudioManager40bpm : MonoBehaviour
 	private AudioSource playerShieldAudioSource;
 	private AudioSource playerDashAudioSource;
 	private AudioSource playerProjectileAudioSource;
+	private AudioSource bossCounterMelodyAudioSource;
 
 	private void Awake() {
 		textureAudioSource = gameObject.AddComponent<AudioSource>();
@@ -38,6 +40,7 @@ public class AudioManager40bpm : MonoBehaviour
 		playerShieldAudioSource = gameObject.AddComponent<AudioSource>();
 		playerDashAudioSource = gameObject.AddComponent<AudioSource>();
 		playerProjectileAudioSource = gameObject.AddComponent<AudioSource>();
+		bossCounterMelodyAudioSource = gameObject.AddComponent<AudioSource>();
 	}
 
 	public void PlayTexture() {
@@ -74,6 +77,14 @@ public class AudioManager40bpm : MonoBehaviour
 		}
 	}
 
+	public void LoopEnemyDrums() {
+		if (enemyDrums != null) {
+			enemyDrumsAudioSource.clip = enemyDrums;
+			enemyDrumsAudioSource.loop = true;
+			enemyDrumsAudioSource.Play();
+		}
+	}
+
 	public void StopEnemyDrums() {
 		if (enemyDrums != null) {
 			enemyDrumsAudioSource.Stop();
@@ -83,6 +94,14 @@ public class AudioManager40bpm : MonoBehaviour
 	public void PlayEnemyBass() {
 		if (enemyBass != null) {
 			enemyBassAudioSource.clip = enemyBass;
+			enemyBassAudioSource.Play();
+		}
+	}
+
+	public void LoopEnemyBass() {
+		if (enemyBass != null) {
+			enemyBassAudioSource.clip = enemyBass;
+			enemyBassAudioSource.loop = true;
 			enemyBassAudioSource.Play();
 		}
 	}
@@ -100,6 +119,14 @@ public class AudioManager40bpm : MonoBehaviour
 		}
 	}
 
+	public void LoopEnemyChords() {
+		if (enemyChords != null) {
+			enemyChordsAudioSource.clip = enemyChords;
+			enemyChordsAudioSource.loop = true;
+			enemyChordsAudioSource.Play();
+		}
+	}
+
 	public void StopEnemyChords() {
 		if (enemyChords != null) {
 			enemyChordsAudioSource.Stop();
@@ -109,6 +136,14 @@ public class AudioManager40bpm : MonoBehaviour
 	public void PlayEnemyMelody() {
 		if (enemyMelody != null) {
 			enemyMelodyAudioSource.clip = enemyMelody;
+			enemyMelodyAudioSource.Play();
+		}
+	}
+
+	public void LoopEnemyMelody() {
+		if (enemyMelody != null) {
+			enemyMelodyAudioSource.clip = enemyMelody;
+			enemyMelodyAudioSource.loop = true;
 			enemyMelodyAudioSource.Play();
 		}
 	}
@@ -144,6 +179,20 @@ public class AudioManager40bpm : MonoBehaviour
 		if (playerProjectile != null) {
 			playerProjectileAudioSource.clip = playerProjectile;
 			playerProjectileAudioSource.Play();
+		}
+	}
+
+	public void LoopBossCounterMelody() {
+		if (bossCounterMelody != null) {
+			bossCounterMelodyAudioSource.clip = bossCounterMelody;
+			bossCounterMelodyAudioSource.loop = true;
+			bossCounterMelodyAudioSource.Play();
+		}
+	}
+
+	public void StopBossCounterMelody() {
+		if (bossCounterMelody != null) {
+			bossCounterMelodyAudioSource.Stop();
 		}
 	}
 }

@@ -4,6 +4,9 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
+	[HideInInspector]
+	public int moveDirection = 1;
+
 	public GameObject projectilePrefab;
 
 	private float moveDistance = 1f;
@@ -17,7 +20,6 @@ public class PlayerController : MonoBehaviour
 	private float targetRotation;
 	private float wallCheckDistance = 1f;
 	private bool isNearWall = false;
-	private int moveDirection = 1;
 	private float groundCheckDistance = 1f;
 	private bool isGrounded = false;
 	private float moveDuration;
@@ -87,18 +89,19 @@ public class PlayerController : MonoBehaviour
 			queueShield = false;
 		}
 
-		Vector2 raycastDirection = (moveDirection == 1) ? Vector2.right : Vector2.left;
-		isNearWall = Physics2D.Raycast(transform.position, raycastDirection, wallCheckDistance, ignoreMask);
-
-		if (isNearWall) {
-			moveDirection *= -1;
-			return;
-		}
-
 		isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, ignoreMask);
 
 		// Handle horizontal movement
 		if (Time.time >= nextMoveTime) {
+			Vector2 raycastDirection = (moveDirection == 1) ? Vector2.right : Vector2.left;
+			isNearWall = Physics2D.Raycast(transform.position, raycastDirection, wallCheckDistance, ignoreMask);
+
+			if (isNearWall) {
+				moveDirection *= -1;
+			}
+
+			//isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, ignoreMask);
+
 			rb.gravityScale = startGravity;
 
 			if (!isGrounded) {
