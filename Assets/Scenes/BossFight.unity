@@ -865,6 +865,7 @@ MonoBehaviour:
   activateJumpEnemy: 0
   activateProjectileEnemy: 0
   shieldEnemyPrefab: {fileID: 7623098824744796025, guid: f0caa2f2145724e3298bb2a967edfed4, type: 3}
+  bossWallPrefab: {fileID: 6316228318823373339, guid: 6106724dea18b435597c550640d48bac, type: 3}
 --- !u!95 &1766582654
 Animator:
   serializedVersion: 5

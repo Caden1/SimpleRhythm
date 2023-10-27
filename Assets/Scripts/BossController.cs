@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class BossController : MonoBehaviour
 {
@@ -7,7 +8,11 @@ public class BossController : MonoBehaviour
 	[HideInInspector] public bool activateProjectileEnemy = false;
 
 	public GameObject shieldEnemyPrefab;
+	public GameObject bossWallPrefab;
 
+	private GameObject player;
+	private PlayerController playerController;
+	private GameObject bossWallClone;
 	private float bpm = 40f;
 	private float beatInterval;
 	private float nextMoveTime = 0f;
@@ -16,35 +21,35 @@ public class BossController : MonoBehaviour
 	private float moveTimer = 0f;
 	private float moveDistance = 1f;
 	private float moveXOffset = 0.4f;
-	private float verticalDashDistance = 5f;
-	private float verticalDashXOffset = 2f;
-	private float horizontalDashDistance = 2f;
-	private float horizontalDashXOffset = 0.8f;
 	private int moveDirection = -1;
 	private float wallCheckDistance = 2f;
-	private float startingXPos;
-	private bool isDashAttackDown = false;
-	private bool isDashAttackHorizontal = false;
-	private bool isDashAttackUp = false;
+	private bool isHorizontalDashAttack = false;
+	private bool isVerticalDashAttack = false;
+	private bool isStunned = false;
+	private bool isMovingAfterStun = false;
+	private Vector2 directionToPlayer;
+	private float xDistanceToPlayer;
+	private float yDistanceToPlayer;
 	private Vector2 snapToPosition;
 	private Vector2 currentVelocity = Vector2.zero;
 	private Rigidbody2D rb;
 	private AudioManager40bpm audioManager40bpm;
 	private int beatCounter = 0;
 	private Animator animator;
-	private CircleCollider2D circleCollider;
 	private int barCounter = 0;
 	private LayerMask ignoreMask;
 
 	private void Start() {
-		circleCollider = GetComponent<CircleCollider2D>();
+		player = GameObject.FindGameObjectWithTag("Player");
 		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
-		ignoreMask = ~(LayerMask.GetMask("Boss"));
-		startingXPos = transform.position.x;
+		ignoreMask = ~(LayerMask.GetMask("Boss") | LayerMask.GetMask("Enemy") | LayerMask.GetMask("Player"));
 		beatInterval = 60f / bpm;
 		moveDuration = beatInterval * 0.5f;
 		rb = GetComponent<Rigidbody2D>();
 		animator = GetComponent<Animator>();
+		if (player != null) {
+			playerController = player.GetComponent<PlayerController>();
+		}
 	}
 
 	private void Update() {
@@ -76,62 +81,33 @@ public class BossController : MonoBehaviour
 				case 2:
 					break;
 				case 3:
+					if (beatCounter == 3) {
+						activateProjectileEnemy = true;
+						animator.Play("CloseEye");
+					}
 					break;
 				case 4:
-					if (beatCounter == 3) {
+					if (beatCounter == 0) {
+						animator.Play("ActivateProjectileEnemies");
+						activateProjectileEnemy = false;
+					} else if (beatCounter == 1) {
+						animator.Play("EmptyState");
+					} else if (beatCounter == 3) {
 						activateJumpEnemy = false;
 					}
 					break;
 				case 5:
-					if (beatCounter == 0) {
-						activateProjectileEnemy = true;
-						animator.Play("CloseEye");
-					} else if (beatCounter == 1) {
-						animator.Play("ActivateProjectileEnemies");
-					} else if (beatCounter == 2) {
-						activateProjectileEnemy = false;
-						animator.Play("EmptyState");
-					}
-					//if (beatCounter == 3) {
-					//	activateProjectileEnemy = true;
-					//	animator.Play("CloseEye");
-					//}
 					break;
 				case 6:
-					//if (beatCounter == 0) {
-					//	animator.Play("ActivateProjectileEnemies");
-					//} else if (beatCounter == 1) {
-					//	activateProjectileEnemy = false;
-					//	animator.Play("EmptyState");
-					//}
 					break;
 				case 7:
 					break;
 				case 8:
-					//if (beatCounter == 3) {
-					//	animator.Play("CloseEye");
-					//}
-					break;
-				case 9:
-					//if (beatCounter == 0) {
-					//	animator.Play("ActivateShieldEnemies");
-					//	Instantiate(shieldEnemyPrefab,
-					//		new Vector2(gameObject.transform.position.x, gameObject.transform.position.y - 1.5f),
-					//		shieldEnemyPrefab.transform.rotation);
-					//		animator.Play("ActivateShieldEnemies");
-					//} else if (beatCounter == 1) {
-					//	animator.Play("EmptyState");
-					//}
-					break;
-				case 10:
 					if (beatCounter == 3) {
 						animator.Play("CloseEye");
 					}
-					//if (beatCounter == 3) {
-					//	animator.Play("CloseEye");
-					//}
 					break;
-				case 11:
+				case 9:
 					if (beatCounter == 0) {
 						animator.Play("ActivateShieldEnemies");
 						Instantiate(shieldEnemyPrefab,
@@ -142,81 +118,70 @@ public class BossController : MonoBehaviour
 						animator.Play("EmptyState");
 					}
 					break;
+				case 10:
+					break;
+				case 11:
+					if (beatCounter == 3) {
+						animator.Play("CloseEye");
+					}
+					break;
 				case 12:
-					//if (beatCounter == 0) {
-					//	isDashAttackDown = true;
-					//	animator.Play("Dash");
-					//	circleCollider.enabled = false;
-					//	audioManager40bpm.LoopEnemyBass();
-					//} else if (beatCounter == 1) {
-					//	animator.Play("EmptyState");
-					//} else if (beatCounter == 2) {
-					//	isDashAttackHorizontal = true;
-					//	isDashAttackDown = false;
-					//}
+					if (beatCounter == 0) {
+						isHorizontalDashAttack = true;
+						directionToPlayer = player.transform.position - transform.position;
+						xDistanceToPlayer = Mathf.Abs(directionToPlayer.x);
+						yDistanceToPlayer = Mathf.Abs(directionToPlayer.y);
+						directionToPlayer.Normalize();
+						audioManager40bpm.LoopEnemyBass();
+						audioManager40bpm.LoopBossCounterMelody();
+						animator.Play("Dash");
+
+						bossWallClone = Instantiate(bossWallPrefab,
+							new Vector2(player.transform.position.x + (5f * playerController.moveDirection), -4.5f),
+							bossWallPrefab.transform.rotation);
+
+					} else if (beatCounter == 1) {
+						isVerticalDashAttack = true;
+						isHorizontalDashAttack = false;
+						animator.Play("EmptyState");
+					} else if (beatCounter == 2) {
+						isStunned = true;
+						isVerticalDashAttack = false;
+					}
 					break;
 				case 13:
-					//if (beatCounter == 2) {
-					//	isDashAttackUp = true;
-					//	isDashAttackHorizontal = false;
-					//}
-					break;
-				case 14:
-					//if (beatCounter == 0) {
-					//	isDashAttackUp = false;
-					//} else if (beatCounter == 2) {
-					//	circleCollider.enabled = true;
-					//}
-					break;
-				case 15:
-					break;
-				case 16:
 					if (beatCounter == 0) {
-						animator.Play("CloseEye");
+						isMovingAfterStun = true;
+						isStunned = false;
+						Destroy(bossWallClone);
 					} else if (beatCounter == 1) {
-						isDashAttackDown = true;
-						animator.Play("Dash");
-						//circleCollider.enabled = false;
-					} else if (beatCounter == 2) {
-						animator.Play("EmptyState");
-					} else if (beatCounter == 3) {
-						isDashAttackHorizontal = true;
-						isDashAttackDown = false;
+						isMovingAfterStun = false;
 					}
-					break;
-				case 17:
-					break;
-				case 18:
-					break;
-				case 19:
-					if (beatCounter == 2) {
-						isDashAttackUp = true;
-						isDashAttackHorizontal = false;
-					}
-					break;
-				case 20:
-					if (beatCounter == 0) {
-						isDashAttackUp = false;
-					} else if (beatCounter == 2) {
-						//circleCollider.enabled = true;
-					}
-					break;
-				case 21:
-					break;
-				case 22:
 					break;
 			}
 
-			if (isDashAttackDown) {
+			if (isHorizontalDashAttack) {
+				if (directionToPlayer.x >= 0f) {
+					currentVelocity.x = ((xDistanceToPlayer + 1f) + ((xDistanceToPlayer + 1f) * 0.4f)) * 1f;
+					currentVelocity.y = 0f;
+				} else {
+					currentVelocity.x = ((xDistanceToPlayer - 1f) + ((xDistanceToPlayer - 1f) * 0.4f)) * -1f;
+					currentVelocity.y = 0f;
+				}
+			} else if (isVerticalDashAttack) {
+				if (directionToPlayer.y >= 0f) {
+					currentVelocity.x = 0f;
+					currentVelocity.y = ((yDistanceToPlayer + 1f) + ((yDistanceToPlayer + 1f) * 0.4f)) * 1f;
+				} else {
+					currentVelocity.x = 0f;
+					currentVelocity.y = ((yDistanceToPlayer - 1f) + ((yDistanceToPlayer - 1f) * 0.4f)) * -1f;
+				}
+			} else if (isStunned) {
 				currentVelocity.x = 0f;
-				currentVelocity.y = (verticalDashDistance + verticalDashXOffset) * -1;
-			} else if (isDashAttackHorizontal) {
-				currentVelocity.x = (horizontalDashDistance + horizontalDashXOffset) * moveDirection;
 				currentVelocity.y = 0f;
-			} else if (isDashAttackUp) {
+			} else if (isMovingAfterStun) {
 				currentVelocity.x = 0f;
-				currentVelocity.y = (verticalDashDistance + verticalDashXOffset) * 1;
-				circleCollider.enabled = true;
+				currentVelocity.y = (10f + (10f * 0.4f)) * 1f;
 			} else {
 				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 				currentVelocity.y = 0f;
@@ -232,15 +197,9 @@ public class BossController : MonoBehaviour
 		}
 
 		if (moveTimer > 0) {
-			if (isDashAttackHorizontal) {
-				circleCollider.enabled = false;
-			}
 			rb.velocity = new Vector2(currentVelocity.x, currentVelocity.y);
 			moveTimer -= Time.deltaTime;
 		} else {
-			if (isDashAttackHorizontal) {
-				circleCollider.enabled = true;
-			}
 			rb.velocity = new Vector2(0f, 0f);
 		}
 
@@ -265,9 +224,14 @@ public class BossController : MonoBehaviour
 
 	private void OnCollisionEnter2D(Collision2D collision) {
 		if (collision.gameObject.CompareTag("Player")) {
-			
-		} else if (collision.gameObject.CompareTag("PlayerProjectile")) {
-			
+			Destroy(collision.gameObject);
+		}
+		if (collision.gameObject.CompareTag("PlayerProjectile")) {
+			Destroy(collision.gameObject);
+			Destroy(gameObject);
+		}
+		if (collision.gameObject.CompareTag("Enemy")) {
+			Physics2D.IgnoreCollision(collision.collider, GetComponent<Collider2D>());
 		}
 	}
 }

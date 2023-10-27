@@ -4,6 +4,9 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
+	[HideInInspector]
+	public int moveDirection = 1;
+
 	public GameObject projectilePrefab;
 
 	private float moveDistance = 1f;
@@ -17,7 +20,6 @@ public class PlayerController : MonoBehaviour
 	private float targetRotation;
 	private float wallCheckDistance = 1f;
 	private bool isNearWall = false;
-	private int moveDirection = 1;
 	private float groundCheckDistance = 1f;
 	private bool isGrounded = false;
 	private float moveDuration;
