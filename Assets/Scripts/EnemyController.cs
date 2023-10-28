@@ -8,46 +8,75 @@ public class EnemyController : MonoBehaviour
 	[HideInInspector]
 	public bool moveLeft = true;
 
-	private float bpm = 40f;
-	private float beatInterval;
-	private float nextMoveTime = 0f;
-	private float moveStartTime;
 	private int moveDirection;
+	private float beatInterval;
+	private float moveStartTime;
 	private float moveDuration;
-	private float moveTimer = 0f;
-	private Vector2 snapToPosition;
-	private Vector2 currentVelocity = Vector2.zero;
-	private Rigidbody2D rb;
-	private AudioManager40bpm audioManager40bpm;
-	private int beatCounter = 0;
-	private Animator animator;
-	private string enemyName;
-	private BoxCollider2D boxCollider;
 	private float startGravity;
+	private string enemyName;
 
-	private GameObject boss;
-
+	private const float bpm = 40f;
 	private const string JumpEnemyName = "JumpEnemy(Clone)";
 	private const string DashEnemyName = "DashEnemy(Clone)";
 	private const string ShieldEnemyName = "ShieldEnemy(Clone)";
 	private const string ProjectileEnemyName = "ProjectileEnemy(Clone)";
 
-	private static Dictionary<string, int> jumpEnemyCount = new Dictionary<string, int>();
-	private static Dictionary<string, int> dashEnemyCount = new Dictionary<string, int>();
-	private static Dictionary<string, int> shieldEnemyCount = new Dictionary<string, int>();
-	private static Dictionary<string, int> projectileEnemyCount = new Dictionary<string, int>();
+	private float nextMoveTime = 0f;
+	private float moveTimer = 0f;
+	private int beatCounter = 0;
+
+	private Vector2 currentVelocity = Vector2.zero;
+
+	private Rigidbody2D rb;
+	private AudioManager40bpm audioManager40bpm;
+	private Animator animator;
+	private BoxCollider2D boxCollider;
+	private GameObject boss;
+
+	private static Dictionary<string, int> jumpEnemyCount;
+	private static Dictionary<string, int> dashEnemyCount;
+	private static Dictionary<string, int> shieldEnemyCount;
+	private static Dictionary<string, int> projectileEnemyCount;
+
+	static EnemyController() {
+		jumpEnemyCount = new Dictionary<string, int>();
+		dashEnemyCount = new Dictionary<string, int>();
+		shieldEnemyCount = new Dictionary<string, int>();
+		projectileEnemyCount = new Dictionary<string, int>();
+	}
 
 	private void Start() {
+		CacheComponents();
+		InitializeVariables();
+		InitializeEnemyCounts();
+		InitializeMoveDirection();
+	}
+
+	private void Update() {
+		if (IsTimeForNextMove()) {
+			ProcessMove();
+		}
+
+		ApplyMovement();
+		SnapTransform();
+	}
+
+	private void CacheComponents() {
 		boss = GameObject.FindGameObjectWithTag("Boss");
-		enemyName = gameObject.name;
-		boxCollider = GetComponent<BoxCollider2D>();
 		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
-		beatInterval = 60f / bpm;
-		moveDuration = beatInterval * 0.5f;
+		boxCollider = GetComponent<BoxCollider2D>();
 		rb = GetComponent<Rigidbody2D>();
 		animator = GetComponent<Animator>();
-		startGravity = rb.gravityScale;
+	}
 
+	private void InitializeVariables() {
+		enemyName = gameObject.name;
+		beatInterval = 60f / bpm;
+		moveDuration = beatInterval * 0.5f;
+		startGravity = rb.gravityScale;
+	}
+
+	private void InitializeEnemyCounts() {
 		if (boss == null) {
 			if (!jumpEnemyCount.ContainsKey(enemyName)) {
 				jumpEnemyCount[enemyName] = 0;
@@ -67,7 +96,9 @@ public class EnemyController : MonoBehaviour
 			shieldEnemyCount[enemyName]++;
 			projectileEnemyCount[enemyName]++;
 		}
+	}
 
+	private void InitializeMoveDirection() {
 		if (moveLeft) {
 			moveDirection = -1;
 		} else {
@@ -82,15 +113,22 @@ public class EnemyController : MonoBehaviour
 		}
 	}
 
-	private void Update() {
-		// Handle horizontal movement
-		if (Time.time >= nextMoveTime) {
-			moveStartTime = Time.time;
-			nextMoveTime = Time.time + beatInterval;
+	private bool IsTimeForNextMove() {
+		return Time.time >= nextMoveTime;
+	}
 
-			if (enemyName == JumpEnemyName) {
-				float moveDistance = 1f;
-				float moveXOffset = 0.4f;
+	private void ProcessMove() {
+		float currentTime = Time.time;
+		moveStartTime = currentTime;
+		nextMoveTime = currentTime + beatInterval;
+
+		float moveDistance;
+		float moveXOffset;
+
+		switch (enemyName) {
+			case JumpEnemyName:
+				moveDistance = 1f;
+				moveXOffset = 0.4f;
 				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 				animator.Play("Pulse");
 				if (beatCounter == 0) {
@@ -100,9 +138,10 @@ public class EnemyController : MonoBehaviour
 						audioManager40bpm.LoopEnemyDrums();
 					}
 				}
-			} else if (enemyName == DashEnemyName) {
-				float moveDistance = 1f;
-				float moveXOffset = 0.4f;
+				break;
+			case DashEnemyName:
+				moveDistance = 1f;
+				moveXOffset = 0.4f;
 				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 				animator.Play("Fade");
 				if (beatCounter == 0) {
@@ -112,9 +151,10 @@ public class EnemyController : MonoBehaviour
 						audioManager40bpm.LoopEnemyBass();
 					}
 				}
-			} else if (enemyName == ShieldEnemyName) {
-				float moveDistance = 2f;
-				float moveXOffset = 0.8f;
+				break;
+			case ShieldEnemyName:
+				moveDistance = 2f;
+				moveXOffset = 0.8f;
 				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 				animator.Play("Shoot");
 				if (beatCounter == 0) {
@@ -124,7 +164,8 @@ public class EnemyController : MonoBehaviour
 						audioManager40bpm.LoopEnemyChords();
 					}
 				}
-			} else if (enemyName == ProjectileEnemyName) {
+				break;
+			case ProjectileEnemyName:
 				currentVelocity.x = 0f;
 				if (beatCounter == 0) {
 					if (boss == null) {
@@ -133,15 +174,16 @@ public class EnemyController : MonoBehaviour
 						audioManager40bpm.LoopEnemyMelody();
 					}
 				}
-			}
-
-			beatCounter = (beatCounter + 1) % 4;
-
-			moveTimer = moveDuration;
+				break;
 		}
 
+		beatCounter = (beatCounter + 1) % 4;
+
+		moveTimer = moveDuration;
+	}
+
+	private void ApplyMovement() {
 		if (enemyName != ProjectileEnemyName) {
-			// Perform horizontal movement
 			if (moveTimer > 0) {
 				if (enemyName == DashEnemyName) {
 					rb.gravityScale = 0f;
@@ -156,12 +198,15 @@ public class EnemyController : MonoBehaviour
 				}
 				rb.velocity = new Vector2(0f, rb.velocity.y);
 			}
+		}
+	}
 
+	private void SnapTransform() {
+		if (enemyName != ProjectileEnemyName) {
 			float t = (Time.time - moveStartTime) / moveDuration;
 
 			if (t > 0.95f) {
-				StartCoroutine(HandlePositionSnap());
-				transform.position = snapToPosition;
+				transform.position = SnapToGrid(transform.position, 1f);
 				animator.Play("EmptyState");
 			}
 		}
@@ -194,11 +239,6 @@ public class EnemyController : MonoBehaviour
 				audioManager40bpm.StopEnemyMelody();
 			}
 		}
-	}
-
-	private IEnumerator HandlePositionSnap() {
-		snapToPosition = SnapToGrid(transform.position, 1f);
-		yield return null;
 	}
 
 	private Vector2 SnapToGrid(Vector2 position, float gridSize) {
