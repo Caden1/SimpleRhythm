@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
@@ -48,19 +47,6 @@ public class PlayerController : MonoBehaviour
 		InitializeVariables();
 	}
 
-	private void CacheComponents() {
-		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
-		rb = GetComponent<Rigidbody2D>();
-		animator = GetComponent<Animator>();
-		ignoreMask = ~(LayerMask.GetMask("Player") | LayerMask.GetMask("Enemy") | LayerMask.GetMask("Triggers") | LayerMask.GetMask("PlayerProjectile"));
-	}
-
-	private void InitializeVariables() {
-		beatInterval = 60f / bpm;
-		moveDuration = beatInterval * 0.5f;
-		startGravity = rb.gravityScale;
-	}
-
 	private void Update() {
 		HandleInput();
 		PerformEnvironmentChecks();
@@ -73,6 +59,19 @@ public class PlayerController : MonoBehaviour
 		ApplyMovement();
 		ApplyRotation();
 		SnapTransform();
+	}
+
+	private void CacheComponents() {
+		audioManager40bpm = GameObject.Find("AudioObject").GetComponent<AudioManager40bpm>();
+		rb = GetComponent<Rigidbody2D>();
+		animator = GetComponent<Animator>();
+		ignoreMask = ~(LayerMask.GetMask("Player") | LayerMask.GetMask("Enemy") | LayerMask.GetMask("Triggers") | LayerMask.GetMask("PlayerProjectile"));
+	}
+
+	private void InitializeVariables() {
+		beatInterval = 60f / bpm;
+		moveDuration = beatInterval * 0.5f;
+		startGravity = rb.gravityScale;
 	}
 
 	private void HandleInput() {
@@ -110,6 +109,10 @@ public class PlayerController : MonoBehaviour
 	}
 
 	private void ProcessMove() {
+		float currentTime = Time.time;
+		moveStartTime = currentTime;
+		nextMoveTime = currentTime + beatInterval;
+
 		if (isNearWall) {
 			moveDirection *= -1;
 		}
@@ -121,10 +124,6 @@ public class PlayerController : MonoBehaviour
 		}
 
 		startRotation = transform.eulerAngles.z;
-
-		float currentTime = Time.time;
-		moveStartTime = currentTime;
-		nextMoveTime = currentTime + beatInterval;
 
 		if (beatCounter == 0) {
 			audioManager40bpm.PlayTexture();
