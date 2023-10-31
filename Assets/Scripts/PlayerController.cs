@@ -219,8 +219,4 @@ public class PlayerController : MonoBehaviour
 		float y = Mathf.Round(position.y / gridSize ) * gridSize;
 		return new Vector2(x, y);
 	}
-
-	private void OnDestroy() {
-		audioManager40bpm.StopTexture();
-	}
 }

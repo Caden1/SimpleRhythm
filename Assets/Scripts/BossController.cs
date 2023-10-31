@@ -55,7 +55,10 @@ public class BossController : MonoBehaviour
 		}
 
 		ApplyMovement();
-		SnapTransform();
+
+		if (!isStunned) {
+			SnapTransform();
+		}
 	}
 
 	private void CacheComponents() {
@@ -92,8 +95,10 @@ public class BossController : MonoBehaviour
 			moveDirection *= -1;
 		}
 
+		
 		HandleBarAndBeatActions();
-
+		
+		
 		beatCounter = (beatCounter + 1) % 4;
 
 		if (beatCounter == 0) {
@@ -104,6 +109,8 @@ public class BossController : MonoBehaviour
 	}
 
 	private void HandleBarAndBeatActions() {
+		float groundCrashYOffset = 0.35f;
+		float stunnedYOffset = 0.15f;
 		switch (barCounter) {
 			case 0:
 				if (beatCounter == 3) {
@@ -183,19 +190,27 @@ public class BossController : MonoBehaviour
 				} else if (beatCounter == 1) {
 					isVerticalDashAttack = true;
 					isHorizontalDashAttack = false;
-					animator.Play("EmptyState");
+					animator.Play("Angry");
 				} else if (beatCounter == 2) {
 					isStunned = true;
 					isVerticalDashAttack = false;
+					animator.Play("GroundCrash");
+					transform.position = new Vector2(transform.position.x, transform.position.y - groundCrashYOffset);
+				} else if (beatCounter == 3) {
+					animator.Play("Stunned");
+					transform.position = new Vector2(transform.position.x, transform.position.y - stunnedYOffset);
 				}
 				break;
 			case 13:
 				if (beatCounter == 0) {
+					transform.position = new Vector2(transform.position.x, transform.position.y + groundCrashYOffset + stunnedYOffset);
 					isMovingAfterStun = true;
 					isStunned = false;
+					animator.Play("Angry");
 					Destroy(bossWallClone);
 				} else if (beatCounter == 1) {
 					isMovingAfterStun = false;
+					animator.Play("EmptyState");
 				}
 				break;
 		}
