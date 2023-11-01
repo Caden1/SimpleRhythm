@@ -18,9 +18,14 @@ public class BossController : MonoBehaviour
 	private const float moveDistance = 1f;
 	private const float moveXOffset = 0.4f;
 	private const float wallCheckDistance = 2f;
+	private const int phase1Length = 14;
+	private const int phase2Length = 10;
+	private const int phase3Length = 6;
 
 	private int moveDirection = -1;
-	private int barCounter = 0;
+	private int barCounterPhase1 = 0;
+	private int barCounterPhase2 = 0;
+	private int barCounterPhase3 = 0;
 	private int beatCounter = 0;
 	private float nextMoveTime = 0f;
 	private float moveTimer = 0f;
@@ -29,6 +34,11 @@ public class BossController : MonoBehaviour
 	private bool isStunned = false;
 	private bool isMovingAfterStun = false;
 	private bool isNearWall = false;
+	private bool hitBoss = false;
+	private bool isPhase1 = true;
+	private bool isPhase2 = false;
+	private bool isPhase3 = false;
+	private bool isBossDefeated = false;
 
 	private Vector2 currentVelocity = Vector2.zero;
 
@@ -95,23 +105,34 @@ public class BossController : MonoBehaviour
 			moveDirection *= -1;
 		}
 
-		
-		HandleBarAndBeatActions();
-		
-		
+		if (isPhase1) {
+			HandleBarAndBeatActionsPhase1();
+		} else if (isPhase2) {
+			HandleBarAndBeatActionsPhase2();
+		} else if (isPhase3) {
+			//HandleBarAndBeatActionsPhase3();
+		} else if (isBossDefeated) {
+			//HandleBarAndBeatActionsBossDefeated();
+		}
+
 		beatCounter = (beatCounter + 1) % 4;
 
-		if (beatCounter == 0) {
-			barCounter = (barCounter + 1) % 32; // 32 bars in total, then the boss loop repeats
+		if (isPhase1 && beatCounter == 0) {
+			barCounterPhase1 = (barCounterPhase1 + 1) % phase1Length;
+		} else if (isPhase2 && beatCounter == 0) {
+			barCounterPhase2 = (barCounterPhase2 + 1) % phase2Length;
+		} else if (isPhase3 && beatCounter == 0) {
+			barCounterPhase3 = (barCounterPhase3 + 1) % phase3Length;
 		}
 
 		moveTimer = moveDuration;
 	}
 
-	private void HandleBarAndBeatActions() {
+	private void HandleBarAndBeatActionsPhase1() {
 		float groundCrashYOffset = 0.35f;
 		float stunnedYOffset = 0.15f;
-		switch (barCounter) {
+
+		switch (barCounterPhase1) {
 			case 0:
 				if (beatCounter == 3) {
 					activateJumpEnemy = true;
@@ -124,8 +145,6 @@ public class BossController : MonoBehaviour
 				} else if (beatCounter == 1) {
 					animator.Play("EmptyState");
 				}
-				break;
-			case 2:
 				break;
 			case 3:
 				if (beatCounter == 3) {
@@ -143,12 +162,6 @@ public class BossController : MonoBehaviour
 					activateJumpEnemy = false;
 				}
 				break;
-			case 5:
-				break;
-			case 6:
-				break;
-			case 7:
-				break;
 			case 8:
 				if (beatCounter == 3) {
 					animator.Play("CloseEye");
@@ -160,12 +173,9 @@ public class BossController : MonoBehaviour
 					Instantiate(shieldEnemyPrefab,
 						new Vector2(gameObject.transform.position.x, gameObject.transform.position.y - 1.5f),
 						shieldEnemyPrefab.transform.rotation);
-					animator.Play("ActivateShieldEnemies");
 				} else if (beatCounter == 1) {
 					animator.Play("EmptyState");
 				}
-				break;
-			case 10:
 				break;
 			case 11:
 				if (beatCounter == 3) {
@@ -210,6 +220,53 @@ public class BossController : MonoBehaviour
 					Destroy(bossWallClone);
 				} else if (beatCounter == 1) {
 					isMovingAfterStun = false;
+					animator.Play("EmptyState");
+				} else if (beatCounter == 3 && hitBoss) {
+					hitBoss = false;
+					if (isPhase1) {
+						isPhase1 = false;
+						isPhase2 = true;
+					} else if (isPhase2) {
+						isPhase2 = false;
+						isPhase3 = true;
+					} else if (isPhase3) {
+						isPhase3 = false;
+						isBossDefeated = true;
+					}
+				}
+				break;
+		}
+	}
+
+	private void HandleBarAndBeatActionsPhase2() {
+		float groundCrashYOffset = 0.35f;
+		float stunnedYOffset = 0.15f;
+
+		switch (barCounterPhase2) {
+			case 0:
+				if (beatCounter == 3) {
+					animator.Play("CloseEye");
+				}
+				break;
+			case 1:
+				if (beatCounter == 0) {
+					animator.Play("ActivateShieldEnemies");
+					Instantiate(shieldEnemyPrefab,
+						new Vector2(gameObject.transform.position.x, gameObject.transform.position.y - 1.5f),
+						shieldEnemyPrefab.transform.rotation);
+				} else if (beatCounter == 1) {
+					animator.Play("EmptyState");
+				} else if (beatCounter == 3) {
+					animator.Play("CloseEye");
+				}
+				break;
+			case 2:
+				if (beatCounter == 0) {
+					animator.Play("ActivateShieldEnemies");
+					Instantiate(shieldEnemyPrefab,
+						new Vector2(gameObject.transform.position.x, gameObject.transform.position.y - 1.5f),
+						shieldEnemyPrefab.transform.rotation);
+				} else if (beatCounter == 1) {
 					animator.Play("EmptyState");
 				}
 				break;
@@ -275,7 +332,7 @@ public class BossController : MonoBehaviour
 		}
 		if (collision.gameObject.CompareTag("PlayerProjectile")) {
 			Destroy(collision.gameObject);
-			Destroy(gameObject);
+			hitBoss = true;
 		}
 		if (collision.gameObject.CompareTag("Enemy")) {
 			Physics2D.IgnoreCollision(collision.collider, GetComponent<Collider2D>());
