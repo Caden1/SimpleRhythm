@@ -21,7 +21,7 @@ public class PlayerController : MonoBehaviour
 	private const float groundCheckDistance = 1f;
 	private const float moveDistance = 1f;
 	private const float dashDistance = 2f;
-	private const float jumpForce = 5.05f;
+	private const float jumpForce = 6.4f;
 	private const float bpm = 40f;
 
 	private int beatCounter = 0;
@@ -29,11 +29,12 @@ public class PlayerController : MonoBehaviour
 	private float moveTimer = 0f;
 	private bool isNearWall = false;
 	private bool isGrounded = false;
+	private bool queueMoveRight = false;
+	private bool queueMoveLeft = false;
 	private bool queueJump = false;
 	private bool queueDash = false;
 	private bool queueShield = false;
 	private bool queueProjectile = false;
-	private bool addForceMovement = false;
 
 	private Vector2 currentVelocity = Vector2.zero;
 
@@ -75,18 +76,26 @@ public class PlayerController : MonoBehaviour
 	}
 
 	private void HandleInput() {
-		if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W)) {
-			ToggleQueue(ref queueJump);
-			ResetQueues(ref queueDash, ref queueShield, ref queueProjectile);
+		if (Input.GetKeyDown(KeyCode.A)) {
+			moveDirection = -1;
+			ToggleQueue(ref queueMoveRight);
+			ResetQueues(ref queueJump, ref queueDash, ref queueShield, ref queueProjectile, ref queueMoveLeft);
 		} else if (Input.GetKeyDown(KeyCode.D)) {
+			moveDirection = 1;
+			ToggleQueue(ref queueMoveLeft);
+			ResetQueues(ref queueJump, ref queueDash, ref queueShield, ref queueProjectile, ref queueMoveRight);
+		} else if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W)) {
+			ToggleQueue(ref queueJump);
+			ResetQueues(ref queueDash, ref queueShield, ref queueProjectile, ref queueMoveRight, ref queueMoveLeft);
+		} else if (Input.GetKeyDown(KeyCode.E)) {
 			ToggleQueue(ref queueDash);
-			ResetQueues(ref queueJump, ref queueShield, ref queueProjectile);
+			ResetQueues(ref queueJump, ref queueShield, ref queueProjectile, ref queueMoveRight, ref queueMoveLeft);
 		} else if (Input.GetKeyDown(KeyCode.S)) {
 			ToggleQueue(ref queueShield);
-			ResetQueues(ref queueJump, ref queueDash, ref queueProjectile);
-		} else if (Input.GetKeyDown(KeyCode.A)) {
+			ResetQueues(ref queueJump, ref queueDash, ref queueProjectile, ref queueMoveRight, ref queueMoveLeft);
+		} else if (Input.GetKeyDown(KeyCode.Q)) {
 			ToggleQueue(ref queueProjectile);
-			ResetQueues(ref queueJump, ref queueDash, ref queueShield);
+			ResetQueues(ref queueJump, ref queueDash, ref queueShield, ref queueMoveRight, ref queueMoveLeft);
 		}
 	}
 
@@ -94,7 +103,7 @@ public class PlayerController : MonoBehaviour
 		queue = !queue;
 	}
 
-	private void ResetQueues(ref bool queue1, ref bool queue2, ref bool queue3) {
+	private void ResetQueues(ref bool queue1, ref bool queue2, ref bool queue3, ref bool queue4, ref bool queue5) {
 		queue1 = queue2 = queue3 = false;
 	}
 
@@ -118,10 +127,6 @@ public class PlayerController : MonoBehaviour
 		}
 
 		rb.gravityScale = startGravity;
-
-		if (!isGrounded) {
-			addForceMovement = true;
-		}
 
 		startRotation = transform.eulerAngles.z;
 
@@ -180,16 +185,11 @@ public class PlayerController : MonoBehaviour
 	}
 
 	private void ApplyMovement() {
-		if (addForceMovement) {
-			addForceMovement = false;
-			rb.AddForce(new Vector2(1f * moveDirection, 4f), ForceMode2D.Impulse);
+		if (moveTimer > 0) {
+			rb.velocity = new Vector2(currentVelocity.x, rb.velocity.y);
+			moveTimer -= Time.deltaTime;
 		} else {
-			if (moveTimer > 0) {
-				rb.velocity = new Vector2(currentVelocity.x, rb.velocity.y);
-				moveTimer -= Time.deltaTime;
-			} else {
-				rb.velocity = new Vector2(0f, rb.velocity.y);
-			}
+			rb.velocity = new Vector2(0f, rb.velocity.y);
 		}
 	}
 

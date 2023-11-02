@@ -12,9 +12,11 @@ public class EnemySpawner : MonoBehaviour
 
 	private const float bpm = 40f;
 	private const string JumpEnemyName = "JumpEnemy";
+	private const string DashEnemyName = "DashEnemy";
 	private const string ProjectileEnemyName = "ProjectileEnemy";
 
 	private int beatCounter = 0;
+	private int barCounter = 0;
 	private float nextSpawnTime = 0f;
 	private bool isScriptActive = false;
 	private bool isSpawned = false;
@@ -61,7 +63,13 @@ public class EnemySpawner : MonoBehaviour
 					Instantiate(enemyPrefab, spawnPoint, enemyPrefab.transform.rotation);
 				}
 			} else {
-				Instantiate(enemyPrefab, spawnPoint, enemyPrefab.transform.rotation);
+				if (enemyName == DashEnemyName) {
+					if (barCounter == 1) {
+						Instantiate(enemyPrefab, spawnPoint, enemyPrefab.transform.rotation);
+					}
+				} else {
+					Instantiate(enemyPrefab, spawnPoint, enemyPrefab.transform.rotation);
+				}
 			}
 			if (isSpawningOnce) {
 				isSpawned = true;
@@ -69,6 +77,9 @@ public class EnemySpawner : MonoBehaviour
 		}
 		nextSpawnTime = Time.time + beatInterval;
 		beatCounter = (beatCounter + 1) % 4;
+		if (beatCounter == 0) {
+			barCounter = (barCounter + 1) % 2;
+		}
 		if (beatCounter == 3) {
 			isScriptActive = true;
 		}

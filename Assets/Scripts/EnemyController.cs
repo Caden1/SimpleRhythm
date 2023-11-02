@@ -139,8 +139,8 @@ public class EnemyController : MonoBehaviour
 				}
 				break;
 			case DashEnemyName:
-				moveDistance = 1f;
-				moveXOffset = 0.4f;
+				moveDistance = 2f;
+				moveXOffset = 0.8f;
 				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 				animator.Play("Fade");
 				if (beatCounter == 0) {
