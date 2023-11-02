@@ -7,6 +7,7 @@ public class BossController : MonoBehaviour
 
 	public GameObject shieldEnemyPrefab;
 	public GameObject bossWallPrefab;
+	public GameObject[] projectileEnemySpawners;
 
 	private float beatInterval;
 	private float moveStartTime;
@@ -54,6 +55,7 @@ public class BossController : MonoBehaviour
 	private void Start() {
 		CacheComponents();
 		InitializeVariables();
+		SetupProjectileEnemySpawners();
 	}
 
 	private void Update() {
@@ -85,6 +87,13 @@ public class BossController : MonoBehaviour
 	private void InitializeVariables() {
 		beatInterval = 60f / bpm;
 		moveDuration = beatInterval * 0.5f;
+	}
+
+	private void SetupProjectileEnemySpawners() {
+		projectileEnemySpawners[0].SetActive(true);
+		projectileEnemySpawners[1].SetActive(true);
+		projectileEnemySpawners[2].SetActive(false);
+		projectileEnemySpawners[3].SetActive(false);
 	}
 
 	private void PerformEnvironmentChecks() {
@@ -223,16 +232,12 @@ public class BossController : MonoBehaviour
 					animator.Play("EmptyState");
 				} else if (beatCounter == 3 && hitBoss) {
 					hitBoss = false;
-					if (isPhase1) {
-						isPhase1 = false;
-						isPhase2 = true;
-					} else if (isPhase2) {
-						isPhase2 = false;
-						isPhase3 = true;
-					} else if (isPhase3) {
-						isPhase3 = false;
-						isBossDefeated = true;
-					}
+					isPhase1 = false;
+					isPhase2 = true;
+					projectileEnemySpawners[0].SetActive(false);
+					projectileEnemySpawners[1].SetActive(false);
+					projectileEnemySpawners[2].SetActive(true);
+					projectileEnemySpawners[3].SetActive(true);
 				}
 				break;
 		}
@@ -268,6 +273,70 @@ public class BossController : MonoBehaviour
 						shieldEnemyPrefab.transform.rotation);
 				} else if (beatCounter == 1) {
 					animator.Play("EmptyState");
+				}
+				break;
+			case 3:
+				if (beatCounter == 3) {
+					activateProjectileEnemy = true;
+					animator.Play("CloseEye");
+				}
+				break;
+			case 4:
+				if (beatCounter == 0) {
+					animator.Play("ActivateProjectileEnemies");
+					activateProjectileEnemy = false;
+				} else if (beatCounter == 1) {
+					animator.Play("EmptyState");
+				}
+				break;
+			case 7:
+				if (beatCounter == 3) {
+					animator.Play("CloseEye");
+				}
+				break;
+			case 8:
+				if (beatCounter == 0) {
+					isHorizontalDashAttack = true;
+					directionToPlayer = player.transform.position - transform.position;
+					xDistanceToPlayer = Mathf.Abs(directionToPlayer.x);
+					yDistanceToPlayer = Mathf.Abs(directionToPlayer.y);
+					directionToPlayer.Normalize();
+					audioManager40bpm.LoopEnemyBass();
+					audioManager40bpm.LoopBossCounterMelody();
+					animator.Play("Dash");
+
+					bossWallClone = Instantiate(bossWallPrefab,
+						new Vector2(player.transform.position.x + (5f * playerController.moveDirection), -4.5f),
+						bossWallPrefab.transform.rotation);
+
+				} else if (beatCounter == 1) {
+					isVerticalDashAttack = true;
+					isHorizontalDashAttack = false;
+					animator.Play("Angry");
+				} else if (beatCounter == 2) {
+					isStunned = true;
+					isVerticalDashAttack = false;
+					animator.Play("GroundCrash");
+					transform.position = new Vector2(transform.position.x, transform.position.y - groundCrashYOffset);
+				} else if (beatCounter == 3) {
+					animator.Play("Stunned");
+					transform.position = new Vector2(transform.position.x, transform.position.y - stunnedYOffset);
+				}
+				break;
+			case 9:
+				if (beatCounter == 0) {
+					transform.position = new Vector2(transform.position.x, transform.position.y + groundCrashYOffset + stunnedYOffset);
+					isMovingAfterStun = true;
+					isStunned = false;
+					animator.Play("Angry");
+					Destroy(bossWallClone);
+				} else if (beatCounter == 1) {
+					isMovingAfterStun = false;
+					animator.Play("EmptyState");
+				} else if (beatCounter == 3 && hitBoss) {
+					hitBoss = false;
+					isPhase2 = false;
+					isPhase3 = true;
 				}
 				break;
 		}
