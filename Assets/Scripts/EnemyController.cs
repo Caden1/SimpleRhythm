@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -140,8 +139,8 @@ public class EnemyController : MonoBehaviour
 				}
 				break;
 			case DashEnemyName:
-				moveDistance = 1f;
-				moveXOffset = 0.4f;
+				moveDistance = 2f;
+				moveXOffset = 0.8f;
 				currentVelocity.x = (moveDistance + moveXOffset) * moveDirection;
 				animator.Play("Fade");
 				if (beatCounter == 0) {
@@ -254,7 +253,7 @@ public class EnemyController : MonoBehaviour
 
 	private void OnCollisionEnter2D(Collision2D collision) {
 		if (collision.gameObject.CompareTag("Player")) {
-			if (collision.gameObject.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Shield")) {
+			if (enemyName == ShieldEnemyName && collision.gameObject.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Shield")) {
 				Destroy(gameObject);
 			} else {
 				Destroy(collision.gameObject);
